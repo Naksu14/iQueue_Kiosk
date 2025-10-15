@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+body {
+  @apply font-poppins;
+}
+
+/* For Firefox */
+html,
+body {
+  scrollbar-width: none;
+}
+
+/* For IE/Edge Legacy */
+html,
+body {
+  -ms-overflow-style: none;
+}
