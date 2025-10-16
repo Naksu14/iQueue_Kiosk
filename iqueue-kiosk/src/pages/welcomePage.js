@@ -27,7 +27,7 @@ const WelcomePage = () => {
         {/* Walk-in Request */}
         <Button
           onClick={() => navigate("/WalkinSelectTransaction")}
-          className="w-64 h-36 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+          className="w-64 h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
           <IconContainer className="p-4 bg-green-100 text-green-600 rounded-full mb-2">
             <FaMale size={26} />
@@ -39,7 +39,7 @@ const WelcomePage = () => {
         {/* Online Appointment */}
         <Button
           onClick={() => navigate("/ScanningPage")}
-          className="w-64 h-36 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+          className="w-64 h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
           <IconContainer className="p-4 bg-blue-100 text-blue-600 rounded-full mb-2">
             <FaQrcode size={26} />

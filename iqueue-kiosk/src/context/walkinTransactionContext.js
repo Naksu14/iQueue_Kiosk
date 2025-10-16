@@ -25,6 +25,7 @@ export const TransactionProvider = ({ children }) => {
   const addTransaction = (office, request, actionType) => {
     const newTransaction = {
       officeId: office.id,
+      officeName: office.name,
       transactionType: actionType,
       transactionDetails: request.name,
       copies: 1,

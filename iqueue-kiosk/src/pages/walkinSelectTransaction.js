@@ -27,7 +27,7 @@ const WalkinSelectTransaction = () => {
         {/* Walk-in Request */}
         <Button
             onClick={() => navigate("/OfficeServiceSelection")}
-            className="w-48 h-36 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+            className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
             <IconContainer className="p-4 bg-green-100 text-green-600 rounded-full mb-2">
             <FaMale size={26} />
@@ -41,7 +41,7 @@ const WalkinSelectTransaction = () => {
         {/* Walk-in Pick up Request */}
         <Button
             onClick={() => navigate("/")}
-            className="w-48 h-36 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+            className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
             <IconContainer className="p-4 bg-blue-100 text-blue-600 rounded-full mb-2">
             <FaMale size={26} />
@@ -55,7 +55,7 @@ const WalkinSelectTransaction = () => {
         {/* Walk-in Inquiry */}
         <Button
             onClick={() => navigate("/")}
-            className="w-48 h-36 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+            className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
             <IconContainer className="p-4 bg-yellow-100 text-yellow-600 rounded-full mb-2">
             <FaMale size={26} />

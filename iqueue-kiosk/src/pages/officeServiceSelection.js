@@ -52,14 +52,14 @@ const OfficeServiceSelection = () => {
           {offices.map((office) => (
             <button
               key={office.id}
-              className={`w-[220px] flex items-center justify-between p-3 rounded shadow-sm hover:shadow-md border transition 
+              className={`w-[240px] flex items-center justify-between p-3 rounded shadow-sm hover:shadow-md border transition 
                 ${activeOffice === office.id ? "bg-gray-200" : "bg-white"}`}
               onClick={() => setActiveOffice(office.id)}
             >
               <div className="text-left">
-                <h2 className="font-semibold text-md">{office.name}</h2>
+                <h2 className="font-semibold text-lg">{office.name}</h2>
                 <p
-                  className={`text-xs ${
+                  className={`text-sm ${
                     office.status === "open" ? "text-green-600" : "text-red-500"
                   }`}
                 >
@@ -78,83 +78,86 @@ const OfficeServiceSelection = () => {
         {/* Right Side Selection Requests / Services */}
         <div className="text-left">
           <p className="text-gray-500 text-sm">Select Requests / Services:</p>
-          <div className="bg-white h-[234px] p-3 rounded-md flex flex-col gap-2 overflow-y-auto">
-            {activeOffice ? (
-              offices.find((o) => o.id === activeOffice)?.transactions.length >
-              0 ? (
-                offices
-                  .find((o) => o.id === activeOffice)
-                  ?.transactions.map((req) => {
-                    const selectedOffice = selectedOfficeRequests.find(
-                      (o) => o.officeId === activeOffice
-                    );
-                    const selectedReq = selectedOffice?.requests.find(
-                      (r) => r.id === req.id
-                    );
-                    const currentOffice = offices.find(
-                      (o) => o.id === activeOffice
-                    );
+          <div className="w-[550px] bg-white p-1 rounded-md">
+            <div className="h-[340px] p-2 flex flex-col gap-2 overflow-y-auto">
+              {activeOffice ? (
+                offices.find((o) => o.id === activeOffice)?.transactions
+                  .length > 0 ? (
+                  offices
+                    .find((o) => o.id === activeOffice)
+                    ?.transactions.map((req) => {
+                      const selectedOffice = selectedOfficeRequests.find(
+                        (o) => o.officeId === activeOffice
+                      );
+                      const selectedReq = selectedOffice?.requests.find(
+                        (r) => r.id === req.id
+                      );
+                      const currentOffice = offices.find(
+                        (o) => o.id === activeOffice
+                      );
 
-                    const alreadyAdded = transactions.some(
-                      (t) =>
-                        t.officeId === currentOffice?.id &&
-                        t.transactionDetails === req.name
-                    );
+                      const alreadyAdded = transactions.some(
+                        (t) =>
+                          t.officeId === currentOffice?.id &&
+                          t.transactionDetails === req.name
+                      );
 
-                    return (
-                      <Container
-                        key={req.id}
-                        className={`flex w-[350px] items-start gap-2 p-3 rounded-md transition 
-                          ${
-                            selectedReq
-                              ? "bg-[#14AD5A] text-white"
-                              : "bg-gray-50 text-gray-700"
-                          }`}
-                      >
-                        <IconContainer className="bg-[#E6F4EA]/100 rounded-lg">
-                          <FaFile className="text-[#14AD5A] text-xl" />
-                        </IconContainer>
+                      return (
+                        <Container
+                          key={req.id}
+                          className={`flex items-start gap-2 p-3 rounded-md transition
+                            ${
+                              selectedReq
+                                ? "bg-[#14AD5A] text-white"
+                                : "bg-gray-50 text-gray-800"
+                            }`}
+                        >
+                          <IconContainer className="bg-[#14AD5A] rounded-lg">
+                            <FaFile className="text-white text-xl" />
+                          </IconContainer>
 
-                        <div className="flex justify-between items-center flex-1">
-                          <div>
-                            <p className="text-sm font-medium">{req.name}</p>
-                            <p className="text-[12px] italic">{req.type}</p>
+                          <div className="flex justify-between items-center flex-1">
+                            <div>
+                              <p className="text-md font-medium">{req.name}</p>
+                              <p className="text-sm italic">{req.type}</p>
+                            </div>
+
+                            {alreadyAdded ? (
+                              <p className="text-xs text-green-600 font-semibold">
+                                Added
+                              </p>
+                            ) : selectedReq ? (
+                              <div className="text-xs">Selected</div>
+                            ) : (
+                              <button
+                                className="bg-gray-200 w-15 h-8 text-xs px-2 py-1 rounded-md disabled:opacity-50"
+                                disabled={alreadyAdded}
+                                onClick={() =>
+                                  handleRequestSelect(
+                                    offices.find((o) => o.id === activeOffice),
+                                    req
+                                  )
+                                }
+                              >
+                                Request
+                              </button>
+                            )}
                           </div>
-
-                          {alreadyAdded ? (
-                            <p className="text-xs text-green-600 font-semibold">
-                              Added
-                            </p>
-                          ) : selectedReq ? (
-                            <div className="text-xs">Selected</div>
-                          ) : (
-                            <button
-                              className="bg-gray-200 w-15 h-8 text-xs px-2 py-1 rounded-md disabled:opacity-50"
-                              disabled={alreadyAdded}
-                              onClick={() =>
-                                handleRequestSelect(
-                                  offices.find((o) => o.id === activeOffice),
-                                  req
-                                )
-                              }
-                            >
-                              Request
-                            </button>
-                          )}
-                        </div>
-                      </Container>
-                    );
-                  })
+                        </Container>
+                      );
+                    })
+                ) : (
+                  <p className="text-gray-400 text-center text-sm mt-8">
+                    No available requests for this office.
+                  </p>
+                )
               ) : (
-                <p className="text-gray-400 text-center text-sm mt-8">
-                  No available requests for this office.
+                <p className="text-gray-600 text-center text-lg mt-8">
+                  Please select an office to see available <br />
+                  requests / Services.
                 </p>
-              )
-            ) : (
-              <p className="text-gray-400 text-center text-sm mt-8">
-                Please select an office to see available requests.
-              </p>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

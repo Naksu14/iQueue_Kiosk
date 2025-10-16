@@ -29,32 +29,45 @@ export const useInputInfo = () => {
 
   // Generate transaction code
   const generateTransactionCode = () => {
-    const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
+    const transactions = JSON.parse(
+      localStorage.getItem("transactions") || "[]"
+    );
     const date = new Date().toISOString().split("T")[0].replace(/-/g, "");
 
-    if (transactions.length === 0) return `NONE-${date}`;
+    // Get unique office names
+    const uniqueOfficeNames = [
+      ...new Set(transactions.map((t) => t.officeName || "General")),
+    ];
 
-    const uniqueOffices = [...new Set(transactions.map((t) => t.officeId))];
+    // Determine prefix
+    const prefix =
+      uniqueOfficeNames.length === 1
+        ? uniqueOfficeNames[0].substring(0, 3).toUpperCase() // single office
+        : "MULTI"; // multi-office
 
-    if (uniqueOffices.length === 1) {
-      const office = transactions[0].officeId;
-      const officePrefix = office === 1 ? "REG" : office === 3 ? "ACC" : "GEN";
-      return `${officePrefix}-${date}-${Math.floor(Math.random() * 9000 + 1000)}`;
-    } else {
-      return `MULTI-${date}-${Math.floor(Math.random() * 9000 + 1000)}`;
-    }
+    return `${prefix}-${date}-${Math.floor(Math.random() * 9000 + 1000)}`;
   };
 
-  // Determine office (for queue number generation)
-  const getOfficeType = () => {
-    const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
-    const uniqueOffices = [...new Set(transactions.map((t) => t.officeId))];
+  // // Determine office (for queue number generation)
+  // const getOfficeType = () => {
+  //   const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
 
-    if (uniqueOffices.length > 1) return "Multiple";
-    if (uniqueOffices[0] === 1) return "Registrar";
-    if (uniqueOffices[0] === 3) return "Accounting";
-    return "General";
-  };
+  //   if (!transactions.length) return "General";
+
+  //   const uniqueOfficeIds = [...new Set(transactions.map((t) => t.officeId))];
+
+  //   // Map office IDs to names dynamically
+  //   const officeNames = uniqueOfficeIds.map(
+  //     (id) =>
+  //       transactions.find((t) => t.officeId === id)?.officeName || "General"
+  //   );
+
+  //   // Return "Multiple" if more than one office, otherwise the single office name
+  //   const officeType = officeNames.length > 1 ? "Multiple" : officeNames[0];
+
+  //   console.log("Office Type:", officeType);
+  //   return officeType;
+  // };
 
   // Handle form submit
   const handleSubmit = async (e) => {
@@ -75,18 +88,41 @@ export const useInputInfo = () => {
       // Step 3: Attach personal info to transactions
       attachPersonalInfoIdToAllTransactions(personalInfoId);
 
-      // Step 4: Create queue number in backend
-      const office = getOfficeType();
+      // Step 4: Determine office type and involved offices
+      const transactions = JSON.parse(
+        localStorage.getItem("transactions") || "[]"
+      );
+      const uniqueOfficeNames = [
+        ...new Set(transactions.map((t) => t.officeName || "General")),
+      ];
+
+      // Main office for the 'office' field (first office)
+      const mainOffice =
+        uniqueOfficeNames.length > 1 ? "Multiple" : uniqueOfficeNames[0];
+
+      // officeInvolved should always be an array
+      const officeInvolved = uniqueOfficeNames;
+
+      // Step 5: Create queue number in backend
       const queuePayload = {
-        office,
-        source: "Walk-in",
+        office: mainOffice,
+        officeInvolved,
+        queueType: "Walk-in",
         personalInfoId,
       };
 
-      const queueRes = await createQueueNumber(queuePayload);
-      localStorage.setItem("queueNumber", queueRes.queueCode);
+      console.log("Queue Payload:", queuePayload);
 
-      console.log(" Queue Number Created:", queueRes.queueCode);
+      const queueRes = await createQueueNumber(queuePayload);
+      localStorage.setItem("queueNumber", queueRes.queueNumber);
+      localStorage.setItem("queueNumberId", queueRes.id);
+
+      console.log(
+        " Queue Number Created:",
+        queueRes.queueNumber,
+        "ID:",
+        queueRes.id
+      );
 
       // Step 5: Navigate to ticket page
       navigate("/QueueTicketPage");

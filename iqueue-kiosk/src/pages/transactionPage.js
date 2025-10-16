@@ -25,7 +25,7 @@ const TransactionDetails = () => {
       <SubHeader text="Transaction Details" />
 
       <div className="flex flex-col items-center w-full px-2">
-        <div className="bg-white w-full max-w-[650px] rounded-xl p-3 shadow-sm">
+        <div className="bg-white w-full rounded-xl p-3 shadow-sm">
           {transactions.length > 0 ? (
             transactions.map((t, i) => (
               <Container
@@ -33,19 +33,19 @@ const TransactionDetails = () => {
                 className="flex items-center justify-between gap-2 p-3 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-all mb-2"
               >
                 {/* Left section - File Icon + Info */}
-                <div className="flex items-center gap-3">
-                  <IconContainer className="bg-[#E6F4EA]/100 p-2 rounded-lg">
-                    <FaFile className="text-[#14AD5A] text-xl" />
+                <div className="flex gap-3">
+                  <IconContainer className="bg-[#14AD5A]  p-2 rounded-lg">
+                    <FaFile className="text-white text-xl" />
                   </IconContainer>
 
                   <div className="flex flex-col leading-tight">
-                    <p className="flex justify-start text-gray-800 text-sm font-semibold truncate max-w-[320px]">
+                    <p className="flex justify-start text-gray-800 text-lg font-semibold truncate w-[550px]">
                       {t.transactionDetails}
                     </p>
-                    {/* <p className="text-gray-500 text-xs">{t.officeName}</p> */}
+                    <p className="flex justify-start text-gray-500 text-md">{t.officeName}</p>
 
                     <p
-                      className={`flex justify-start text-xs ${
+                      className={`flex justify-start text-md font-semibold ${
                         t.transactionType === "Payment"
                           ? "text-blue-600"
                           : "text-green-600"
@@ -54,7 +54,7 @@ const TransactionDetails = () => {
                       {t.transactionType}
 
                       {t.fee > 0 && (
-                        <span className="text-red-500 text-xs ml-2">
+                        <span className="text-red-500 text-md font-semibold ml-2">
                           ₱ {t.fee.toLocaleString()}
                         </span>
                       )}

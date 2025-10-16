@@ -1,50 +1,12 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import { FaTicketAlt, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import SubHeader from "../components/layout/subheader";
 import Button from "../components/button/button";
-import { createUserTransaction } from "../services/dbServices/createTransactionService";
-import { useTransaction } from "../context/walkinTransactionContext";
+import { useQueueTicket } from "../hooks/useQueueTicket";
 
 const QueueTicketPage = () => {
-  const navigate = useNavigate();
-  const [printStatus, setPrintStatus] = useState("idle");
-  const { transactions, clearTransactions } = useTransaction();
-
-  const handlePrint = async () => {
-    if (!transactions || transactions.length === 0) {
-      console.warn(" No transactions to print.");
-      return;
-    }
-
-    setPrintStatus("waiting");
-
-    try {
-      console.log(" Submitting transactions:", transactions);
-
-      //  Send transactions to backend
-      const res = await createUserTransaction(transactions);
-
-      console.log(" Transactions created successfully:", res);
-
-      // Simulate ticket printing delay
-      setTimeout(() => {
-        setPrintStatus("success");
-
-        setTimeout(() => {
-          clearTransactions();
-          localStorage.clear();
-          navigate("/");
-        }, 5000);
-      }, 3000);
-    } catch (err) {
-      console.error("❌ Failed to create transactions:", err);
-      setPrintStatus("error");
-    }
-  };
-
-  const handleTryAgain = () => setPrintStatus("idle");
+  const { printStatus, handlePrint, handleTryAgain } = useQueueTicket();
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -70,12 +32,14 @@ const QueueTicketPage = () => {
               <h2 className="font-semibold text-lg ml-3">Print</h2>
             </Button>
           )}
+
           {printStatus === "waiting" && (
             <>
               <ImSpinner2 className="animate-spin text-5xl text-gray-400 my-6" />
               <span className="text-gray-600">Printing ticket...</span>
             </>
           )}
+
           {printStatus === "success" && (
             <>
               <FaCheckCircle className="text-5xl text-green-500 my-6" />
@@ -84,6 +48,7 @@ const QueueTicketPage = () => {
               </span>
             </>
           )}
+
           {printStatus === "error" && (
             <>
               <FaTimesCircle className="text-5xl text-red-500 mb-2" />

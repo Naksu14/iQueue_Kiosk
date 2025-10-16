@@ -12,7 +12,7 @@ import QueueTicketPage from "./pages/queueTicketPage";
 
 function App() {
   return (
-    <div className="App bg-[#F1F9F9] min-h-screen flex flex-col">
+    <div className="App bg-[#F4F5F9] min-h-screen flex flex-col">
       {/* Navbar */}
       <Nav />
 

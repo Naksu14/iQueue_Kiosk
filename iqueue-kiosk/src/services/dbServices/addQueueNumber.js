@@ -15,3 +15,17 @@ export const createQueueNumber = async (userData) => {
     throw error;
   }
 };
+
+export const updateQueueNoStatus = async (queueNumberId, status) =>{
+  try {
+    const response = await axios.patch(
+      `${API_URL}/queue-number/update-status/${queueNumberId}`,
+      { status }
+    );
+    const updatedQueueNumber = response.data;
+    return updatedQueueNumber;
+  } catch (error) {
+    console.error("Error updating queue number status:", error);
+    throw error;
+  }
+};

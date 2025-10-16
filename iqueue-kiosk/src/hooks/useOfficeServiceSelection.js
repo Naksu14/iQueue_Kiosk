@@ -19,7 +19,7 @@ export const useOfficeServiceSelection = () => {
 
   // Toggle a request under an office
   const handleRequestSelect = (office, req) => {
-    const actionType = req.type || "Request Document";
+    const actionType = req.type;
 
     setSelectedOfficeRequests((prev) => {
       const officeEntry = prev.find((o) => o.officeId === office.id);
