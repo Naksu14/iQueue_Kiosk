@@ -4,14 +4,33 @@ import { useNavigate } from "react-router-dom";
 import SubHeader from "../components/layout/subheader";
 import BackButton from "../components/button/backButton";
 import { useInputInfo } from "../hooks/useInputInfo";
+import { useKeyboard } from "../context/KeyboardContext";
 
 const InputInformation = () => {
   const navigate = useNavigate();
   const { formData, handleChange, handleSubmit } = useInputInfo();
+  const { showKeyboard, isVisible, hideKeyboard } = useKeyboard();
+
+  // Helper to focus and scroll input into view
+  const handleFocus = (e) => {
+    showKeyboard(e.target, handleChange);
+
+    // Scroll smoothly so the input stays visible above keyboard
+    setTimeout(() => {
+      e.target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center">
-
+    <div
+      id="form-container"
+      className={`flex flex-col items-center justify-center overflow-y-auto h-screen transition-all duration-300 ${
+        isVisible ? "pb-60" : "pb-0"
+      }`}
+    >
       <div className="w-full">
         <form
           onSubmit={handleSubmit}
@@ -31,6 +50,7 @@ const InputInformation = () => {
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
+              onFocus={handleFocus}
               className="w-full border rounded-md px-4 py-3 bg-gray-100"
               placeholder="e.g. Juan Carlos Jr Rizal"
               required
@@ -64,25 +84,23 @@ const InputInformation = () => {
                   const value = e.target.value.slice(0, 2); // limit to 2 digits
                   handleChange({ target: { name: "grade", value } });
                 }}
+                onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="e.g. 12"
                 required
               />
-
             </div>
 
             <div>
-              <label className="block font-semibold mb-1">
-                Section<span className="text-red-500">*</span>
-              </label>
+              <label className="block font-semibold mb-1">Section</label>
               <input
                 type="text"
                 name="section"
                 value={formData.section}
                 onChange={handleChange}
+                onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="e.g. Shepherd"
-                // required
               />
             </div>
 
@@ -96,35 +114,33 @@ const InputInformation = () => {
                 value={formData.schoolYear}
                 onChange={(e) => {
                   let value = e.target.value
-                    .replace(/[^\d]/g, "") // remove non-numeric characters
-                    .slice(0, 8); // limit to 8 digits (e.g., 20252026)
-
-                  // auto-insert " - " after 4 digits
+                    .replace(/[^\d]/g, "")
+                    .slice(0, 8);
                   if (value.length > 4) {
                     value = value.slice(0, 4) + " - " + value.slice(4);
                   }
-
                   handleChange({ target: { name: "schoolYear", value } });
                 }}
+                onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="e.g. 0000 - 0000"
                 required
               />
-
             </div>
           </div>
 
           {/* Email */}
           <div className="flex justify-between items-center gap-4">
-            <div>
+            <div className="flex-1">
               <label className="block font-semibold mb-1">
-              Email <span className="text-red-500">*</span>
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="e.g. juan@example.com"
                 required
@@ -137,6 +153,7 @@ const InputInformation = () => {
             <button
               type="submit"
               className="bg-blue-600 text-white rounded-md px-4 py-4 text-xl w-[50%] hover:bg-blue-700 active:scale-95 transition-transform"
+              onClick={hideKeyboard}
             >
               Submit
             </button>
