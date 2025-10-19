@@ -4,7 +4,7 @@ import { FaQuestionCircle } from "react-icons/fa";
 export default function HelpGuideModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-[600px] max-h-[90%] overflow-y-auto px-4 py-5 relative">
+      <div className="bg-white rounded-lg shadow-lg w-[90%] max-h-[90%] overflow-y-auto px-4 py-5 relative">
         {/* Close button */}
         <button
           onClick={onClose}

@@ -46,15 +46,26 @@ const OfficeServiceSelection = () => {
       <SubHeader text="Step 2: Please select your destination offices and requests." />
 
       <div className="flex gap-2 w-full justify-center">
-        {/* Left Side  Office List */}
+        {/* Left Side Office List */}
         <div className="text-left flex flex-col gap-2">
-          <p className="text-gray-500 text-sm">Offices:</p>
+          <p className="bg-white p-1 px-3 border rounded-md shadow-sm text-sm font-bold">OFFICES:</p>
           {offices.map((office) => (
             <button
               key={office.id}
-              className={`w-[240px] flex items-center justify-between p-3 rounded shadow-sm hover:shadow-md border transition 
-                ${activeOffice === office.id ? "bg-gray-200" : "bg-white"}`}
-              onClick={() => setActiveOffice(office.id)}
+              disabled={office.status === "closed"} // disable when closed
+              className={`w-[230px] flex items-center justify-between p-3 rounded shadow-md hover:shadow-lg border transition
+                ${
+                  office.status === "closed"
+                    ? "text-gray-400 cursor-not-allowed"
+                    : activeOffice === office.id
+                    ? "bg-gray-200"
+                    : "bg-white"
+                }`}
+              onClick={() => {
+                if (office.status !== "closed") {
+                  setActiveOffice(office.id);
+                }
+              }}
             >
               <div className="text-left">
                 <h2 className="font-semibold text-lg">{office.name}</h2>
@@ -66,7 +77,9 @@ const OfficeServiceSelection = () => {
                   {office.status}
                 </p>
               </div>
-              {activeOffice === office.id && (
+
+              {/* Show arrow only if active and open */}
+              {activeOffice === office.id && office.status === "open" && (
                 <div className="text-gray-400">
                   <FaArrowRight />
                 </div>
@@ -77,9 +90,9 @@ const OfficeServiceSelection = () => {
 
         {/* Right Side Selection Requests / Services */}
         <div className="text-left">
-          <p className="text-gray-500 text-sm">Select Requests / Services:</p>
-          <div className="w-[550px] bg-white p-1 rounded-md">
-            <div className="h-[340px] p-2 flex flex-col gap-2 overflow-y-auto">
+          <p className="bg-white p-1 px-3 border rounded-md shadow-sm text-sm font-bold mb-2">SELECT REQUESTS / SERVICES:</p>
+          <div className="w-[540px] bg-white p-1 rounded-md">
+            <div className="h-[320px] p-2 flex flex-col gap-2 overflow-y-auto">
               {activeOffice ? (
                 offices.find((o) => o.id === activeOffice)?.transactions
                   .length > 0 ? (
@@ -109,7 +122,7 @@ const OfficeServiceSelection = () => {
                             ${
                               selectedReq
                                 ? "bg-[#14AD5A] text-white"
-                                : "bg-gray-50 text-gray-800"
+                                : "bg-[#F4F5F9] text-gray-800"
                             }`}
                         >
                           <IconContainer className="bg-[#14AD5A] rounded-lg">
@@ -152,9 +165,9 @@ const OfficeServiceSelection = () => {
                   </p>
                 )
               ) : (
-                <p className="text-gray-600 text-center text-lg mt-8">
-                  Please select an office to see available <br />
-                  requests / Services.
+                <p className="text-gray-400 text-center text-lg mt-8">
+                  Please select an office on the left <br />
+                  to see available requests / Services.
                 </p>
               )}
             </div>

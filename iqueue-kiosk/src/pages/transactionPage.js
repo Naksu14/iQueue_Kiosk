@@ -30,35 +30,44 @@ const TransactionDetails = () => {
             transactions.map((t, i) => (
               <Container
                 key={i}
-                className="flex items-center justify-between gap-2 p-3 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-all mb-2"
+                className="flex items-center justify-between gap-2 px-2 p-1 bg-gray-100 rounded-lg transition-transform shadow-lg hover:shadow-xl transition-all mb-2"
               >
                 {/* Left section - File Icon + Info */}
-                <div className="flex gap-3">
-                  <IconContainer className="bg-[#14AD5A]  p-2 rounded-lg">
-                    <FaFile className="text-white text-xl" />
+                <div className="flex items-center gap-4 p-3 rounded-lg  truncate w-[500px]">
+                  {/*  Icon */}
+                  <IconContainer className="bg-[#14AD5A] p-3 rounded-xl flex items-center justify-center shadow-md">
+                    <FaFile className="text-white text-2xl" />
                   </IconContainer>
 
-                  <div className="flex flex-col leading-tight">
-                    <p className="flex justify-start text-gray-800 text-lg font-semibold truncate w-[550px]">
+                  {/*  Info */}
+                  <div className="flex flex-col justify-center text-left leading-snug">
+                    {/* Transaction Title */}
+                    <p className="text-gray-900 text-lg font-semibold max-w-[450px] truncate">
                       {t.transactionDetails}
                     </p>
-                    <p className="flex justify-start text-gray-500 text-md">{t.officeName}</p>
 
-                    <p
-                      className={`flex justify-start text-md font-semibold ${
-                        t.transactionType === "Payment"
-                          ? "text-blue-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {t.transactionType}
+                    {/* Office Name */}
+                    <p className="text-gray-600 text-sm font-normal mb-1">
+                      {t.officeName}
+                    </p>
 
+                    {/* Transaction Type + Fee */}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-base font-medium ${
+                          t.transactionType === "Payment"
+                            ? "text-blue-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {t.transactionType}
+                      </span>
                       {t.fee > 0 && (
-                        <span className="text-red-500 text-md font-semibold ml-2">
+                        <span className="text-red-500 text-base font-medium">
                           ₱ {t.fee.toLocaleString()}
                         </span>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
 
@@ -67,16 +76,16 @@ const TransactionDetails = () => {
                   {t.transactionType !== "Payment" && (
                     <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1">
                       <button
-                        className="bg-gray-300 active:bg-gray-400 text-lg w-8 h-8 rounded-md"
+                        className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
                         onClick={() => updateCopies(i, t.copies + 1)}
                       >
                         +
                       </button>
-                      <span className="text-sm px-1 font-semibold text-gray-700">
+                      <span className="text-xl px-2 font-semibold text-gray-700">
                         {t.copies}
                       </span>
                       <button
-                        className="bg-gray-300 active:bg-gray-400 text-lg w-8 h-8 rounded-md"
+                        className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
                         onClick={() => updateCopies(i, t.copies - 1)}
                       >
                         -
@@ -85,7 +94,7 @@ const TransactionDetails = () => {
                   )}
 
                   <button
-                    className="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white p-2 rounded-md"
+                    className="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white p-3 rounded-md"
                     onClick={() => removeTransaction(i)}
                   >
                     <FaTrash />

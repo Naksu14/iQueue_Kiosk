@@ -11,13 +11,16 @@ const InputInformation = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <SubHeader text="Step 4: Help us identify and process your request faster" />
 
       <div className="w-full">
         <form
           onSubmit={handleSubmit}
           className="bg-white w-full p-6 rounded-md shadow-lg text-left"
         >
+          <div className="flex justify-center -mt-2">
+            <SubHeader text="Step 4: Help us identify and process your request faster" />
+          </div>
+
           {/* Full Name */}
           <div className="mb-4">
             <label className="block font-semibold mb-1">
@@ -35,7 +38,7 @@ const InputInformation = () => {
           </div>
 
           {/* Alumni Checkbox */}
-          <div className="flex items-center mb-4">
+          <div className="flex items-center mb-3">
             <label className="font-semibold mr-3">Alumni</label>
             <input
               type="checkbox"
@@ -48,7 +51,7 @@ const InputInformation = () => {
           </div>
 
           {/* Grade / Section / School Year */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
             <div>
               <label className="block font-semibold mb-1">
                 Grade Level<span className="text-red-500">*</span>
@@ -79,7 +82,7 @@ const InputInformation = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="e.g. Shepherd"
-                required
+                // required
               />
             </div>
 
@@ -112,26 +115,25 @@ const InputInformation = () => {
           </div>
 
           {/* Email */}
-          <div className="mb-4">
-            <label className="block font-semibold mb-1">
+          <div className="flex justify-between items-center gap-4">
+            <div>
+              <label className="block font-semibold mb-1">
               Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full border rounded-md px-4 py-3 bg-gray-100"
-              placeholder="e.g. juan@example.com"
-              required
-            />
-            <span className="text-gray-500 text-sm">
-              This email will be used for notifications.
-            </span>
-          </div>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full border rounded-md px-4 py-3 bg-gray-100"
+                placeholder="e.g. juan@example.com"
+                required
+              />
+              <span className="text-gray-500 text-sm">
+                This email will be used for notifications.
+              </span>
+            </div>
 
-          {/* Submit */}
-          <div className="flex justify-center mt-6">
             <button
               type="submit"
               className="bg-blue-600 text-white rounded-md px-4 py-4 text-xl w-[50%] hover:bg-blue-700 active:scale-95 transition-transform"
