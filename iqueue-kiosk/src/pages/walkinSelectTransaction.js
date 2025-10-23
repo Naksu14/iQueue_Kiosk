@@ -26,46 +26,46 @@ const WalkinSelectTransaction = () => {
       <div className="grid grid-cols-3 gap-6 mt-3">
         {/* Walk-in Request */}
         <Button
-            onClick={() => navigate("/OfficeServiceSelection")}
-            className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+          onClick={() => navigate("/OfficeServiceSelection")}
+          className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
-            <IconContainer className="p-4 bg-green-100 text-green-600 rounded-full mb-2">
+          <IconContainer className="p-4 bg-green-100 text-green-600 rounded-full mb-2">
             <FaMale size={26} />
-            </IconContainer>
-            <h2 className="font-semibold text-base mb-1">Request Transaction</h2>
-            <p className="text-gray-600 text-[13px] font-medium">
+          </IconContainer>
+          <h2 className="font-semibold text-base mb-1">Request Transaction</h2>
+          <p className="text-gray-600 text-[13px] font-medium">
             Make new transaction / service request
-            </p>
+          </p>
         </Button>
 
         {/* Walk-in Pick up Request */}
         <Button
-            onClick={() => navigate("/")}
-            className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+          onClick={() => navigate("/")}
+          className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
-            <IconContainer className="p-4 bg-blue-100 text-blue-600 rounded-full mb-2">
+          <IconContainer className="p-4 bg-blue-100 text-blue-600 rounded-full mb-2">
             <FaMale size={26} />
-            </IconContainer>
-            <h2 className="font-semibold text-base mb-1">Pick-up Request</h2>
-            <p className="text-gray-600 text-[13px] font-medium">
+          </IconContainer>
+          <h2 className="font-semibold text-base mb-1">Pick-up Request</h2>
+          <p className="text-gray-600 text-[13px] font-medium">
             Claim your request / document
-            </p>
+          </p>
         </Button>
 
         {/* Walk-in Inquiry */}
         <Button
-            onClick={() => navigate("/")}
-            className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+          onClick={() => navigate("/")}
+          className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
-            <IconContainer className="p-4 bg-yellow-100 text-yellow-600 rounded-full mb-2">
+          <IconContainer className="p-4 bg-yellow-100 text-yellow-600 rounded-full mb-2">
             <FaMale size={26} />
-            </IconContainer>
-            <h2 className="font-semibold text-base mb-1">Inquiry</h2>
-            <p className="text-gray-600 text-[13px] font-medium">
+          </IconContainer>
+          <h2 className="font-semibold text-base mb-1">Inquiry</h2>
+          <p className="text-gray-600 text-[13px] font-medium">
             Ask about processes or services of school
-            </p>
+          </p>
         </Button>
-        </div>
+      </div>
 
       <HelpButton />
     </div>

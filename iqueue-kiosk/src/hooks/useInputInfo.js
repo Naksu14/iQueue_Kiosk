@@ -48,27 +48,6 @@ export const useInputInfo = () => {
     return `${prefix}-${date}-${Math.floor(Math.random() * 9000 + 1000)}`;
   };
 
-  // // Determine office (for queue number generation)
-  // const getOfficeType = () => {
-  //   const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
-
-  //   if (!transactions.length) return "General";
-
-  //   const uniqueOfficeIds = [...new Set(transactions.map((t) => t.officeId))];
-
-  //   // Map office IDs to names dynamically
-  //   const officeNames = uniqueOfficeIds.map(
-  //     (id) =>
-  //       transactions.find((t) => t.officeId === id)?.officeName || "General"
-  //   );
-
-  //   // Return "Multiple" if more than one office, otherwise the single office name
-  //   const officeType = officeNames.length > 1 ? "Multiple" : officeNames[0];
-
-  //   console.log("Office Type:", officeType);
-  //   return officeType;
-  // };
-
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -111,18 +90,18 @@ export const useInputInfo = () => {
         personalInfoId,
       };
 
-      console.log("Queue Payload:", queuePayload);
+      //console.log("Queue Payload:", queuePayload);
 
       const queueRes = await createQueueNumber(queuePayload);
       localStorage.setItem("queueNumber", queueRes.queueNumber);
       localStorage.setItem("queueNumberId", queueRes.id);
 
-      console.log(
-        " Queue Number Created:",
-        queueRes.queueNumber,
-        "ID:",
-        queueRes.id
-      );
+      // console.log(
+      //   " Queue Number Created:",
+      //   queueRes.queueNumber,
+      //   "ID:",
+      //   queueRes.id
+      // );
 
       // Step 5: Navigate to ticket page
       navigate("/QueueTicketPage");

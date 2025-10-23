@@ -48,7 +48,9 @@ const OfficeServiceSelection = () => {
       <div className="flex gap-2 w-full justify-center">
         {/* Left Side Office List */}
         <div className="text-left flex flex-col gap-2">
-          <p className="bg-white p-1 px-3 border rounded-md shadow-sm text-sm font-bold">OFFICES:</p>
+          <p className="bg-white p-1 px-3 border rounded-md shadow-sm text-sm font-bold">
+            OFFICES:
+          </p>
           {offices.map((office) => (
             <button
               key={office.id}
@@ -90,7 +92,9 @@ const OfficeServiceSelection = () => {
 
         {/* Right Side Selection Requests / Services */}
         <div className="text-left">
-          <p className="bg-white p-1 px-3 border rounded-md shadow-sm text-sm font-bold mb-2">SELECT REQUESTS / SERVICES:</p>
+          <p className="bg-white p-1 px-3 border rounded-md shadow-sm text-sm font-bold mb-2">
+            SELECT REQUESTS / SERVICES:
+          </p>
           <div className="w-[540px] bg-white p-1 rounded-md">
             <div className="h-[320px] p-2 flex flex-col gap-2 overflow-y-auto">
               {activeOffice ? (

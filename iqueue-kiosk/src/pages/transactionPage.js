@@ -30,7 +30,7 @@ const TransactionDetails = () => {
             transactions.map((t, i) => (
               <Container
                 key={i}
-                className="flex items-center justify-between gap-2 px-2 p-1 bg-gray-100 rounded-lg transition-transform shadow-lg hover:shadow-xl transition-all mb-2"
+                className="flex items-center justify-between gap-2 px-2 p-1 bg-gray-50 rounded-lg transition-transform shadow-lg hover:shadow-xl transition-all mb-2"
               >
                 {/* Left section - File Icon + Info */}
                 <div className="flex items-center gap-4 p-3 rounded-lg  truncate w-[500px]">

@@ -18,11 +18,11 @@ export const useQueueTicket = () => {
     setPrintStatus("waiting");
 
     try {
-      console.log("Submitting transactions:", transactions);
+      //console.log("Submitting transactions:", transactions);
 
       // Send transactions to backend
       const res = await createUserTransaction(transactions);
-      console.log(" Transactions created successfully:", res);
+      //console.log(" Transactions created successfully:", res);
 
       //  Get queueNumberId from backend or localStorage (fallback)
       const queueNumberId =
@@ -42,7 +42,7 @@ export const useQueueTicket = () => {
         setTimeout(() => {
           //  Backup before clearing localStorage
           const safeQueueId = queueNumberId;
-          console.log("Safe Queue ID before clear:", safeQueueId);
+          //console.log("Safe Queue ID before clear:", safeQueueId);
 
           clearTransactions();
           localStorage.clear(); // reset only after saving ID
@@ -56,10 +56,10 @@ export const useQueueTicket = () => {
               return;
             }
 
-            console.log(" Updating queue status → waiting:", safeQueueId);
+            //console.log(" Updating queue status → waiting:", safeQueueId);
             try {
               await updateQueueNoStatus(safeQueueId, "waiting");
-              console.log(" Queue status updated successfully!");
+              //console.log(" Queue status updated successfully!");
             } catch (error) {
               console.error("❌ Failed to update queue status:", error);
             }

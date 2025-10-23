@@ -113,9 +113,7 @@ const InputInformation = () => {
                 name="schoolYear"
                 value={formData.schoolYear}
                 onChange={(e) => {
-                  let value = e.target.value
-                    .replace(/[^\d]/g, "")
-                    .slice(0, 8);
+                  let value = e.target.value.replace(/[^\d]/g, "").slice(0, 8);
                   if (value.length > 4) {
                     value = value.slice(0, 4) + " - " + value.slice(4);
                   }

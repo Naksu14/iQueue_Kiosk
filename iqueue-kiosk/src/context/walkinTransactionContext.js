@@ -29,7 +29,7 @@ export const TransactionProvider = ({ children }) => {
       transactionType: actionType,
       transactionDetails: request.name,
       copies: 1,
-      fee: request.amount > 0 ? request.amount : "n/a",
+      fee: request.amount > 0 ? request.amount : "0",
       paymentStatus: request.amount > 0 ? "Unpaid" : "n/a",
       status: "pending",
       estimatedDays: null,
