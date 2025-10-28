@@ -8,7 +8,7 @@ import util from "util";
 const app = express();
 const execAsync = util.promisify(exec); // Allows async/await usage
 
-// ✅ CORS configuration
+// CORS configuration
 const corsOptions = {
   origin: "http://localhost:3000", // React app origin
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -64,6 +64,4 @@ Queue No: ${queueNumber}
 
 // Start server
 const PORT = 4000;
-app.listen(PORT, () =>
-  console.log(`🖨️ Printer server running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(` Printer server running on port ${PORT}`));
