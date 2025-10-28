@@ -2,14 +2,27 @@ import express from "express";
 import bodyParser from "body-parser";
 import { writeFileSync, unlinkSync } from "fs";
 import { exec } from "child_process";
-import cors from "cors"; // ⬅️ IMPORT CORS
+import cors from "cors";
 
 const app = express();
 
-// ⬅️ USE CORS MIDDLEWARE HERE
-app.use(cors());
+// ✅ CORS configuration
+const corsOptions = {
+  origin: "http://localhost:3000", // React app origin
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+  credentials: true,
+  optionsSuccessStatus: 204 // for legacy browsers
+};
 
+// Apply CORS middleware globally
+app.use(cors(corsOptions));
+
+// Parse JSON requests
 app.use(bodyParser.json());
+
+// Handle OPTIONS preflight requests explicitly
+app.options("*", cors(corsOptions));
 
 // Print endpoint
 app.post("/print", (req, res) => {
@@ -35,6 +48,7 @@ Queue No: ${queueNumber}
 
   exec(`sudo tee /dev/usb/lp0 < ${tmpFile}`, (err, stdout, stderr) => {
     unlinkSync(tmpFile); // cleanup
+
     if (err) {
       console.error("❌ Print error:", err);
       return res.status(500).json({ success: false, message: "Printer error" });
