@@ -9,7 +9,9 @@ const execAsync = util.promisify(exec); // Allows async/await usage
 
 // CORS configuration
 const corsOptions = {
-  origin: "http://localhost:3000", // React app origin
+  // Allow the React dev server and local network for kiosk access.
+  // In production restrict this to the kiosk UI origin or specific IPs.
+  origin: ["http://localhost:3000", "http://127.0.0.1", "*"], // React app origin
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
   credentials: true,
@@ -21,7 +23,9 @@ const corsOptions = {
   // Apply CORS middleware globally
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
-app.options("*", cors(corsOptions)); // handle preflight
+// Note: app.use(cors(...)) above already handles CORS globally including preflight.
+// Removing app.options("*", ...) because certain versions of path-to-regexp
+// can throw when given a bare "*" path (Missing parameter name at index 1).
 
 // Health check endpoint
 app.get("/ping", (req, res) => res.json({ ok: true }));
@@ -63,4 +67,8 @@ Queue No: ${queueNumber}
 
 // Start server
 const PORT = 4000;
-app.listen(PORT, () => console.log(` Printer server running on port ${PORT}`));
+const HOST = "0.0.0.0"; // bind to all interfaces so remote browsers on the kiosk can connect
+
+app.listen(PORT, HOST, () => {
+  console.log(` Printer server running on ${HOST}:${PORT}`);
+});
