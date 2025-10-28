@@ -22,7 +22,6 @@ export const useQueueTicket = () => {
 
       // Send transactions to backend
       const res = await createUserTransaction(transactions);
-      //console.log(" Transactions created successfully:", res);
 
       //  Get queueNumberId from backend or localStorage (fallback)
       const queueNumberId =
