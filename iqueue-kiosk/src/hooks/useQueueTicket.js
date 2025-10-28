@@ -40,7 +40,7 @@ export const useQueueTicket = () => {
       const officeName = res?.officeName || "Registrar";
 
       // 🔽 Call printer server
-      const response = await fetch("http://localhost:4000/print", {
+      const response = await fetch("http://192.168.1.50:4000/print", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ queueNumber, officeName }),
