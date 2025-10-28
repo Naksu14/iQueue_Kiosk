@@ -9,11 +9,13 @@ app.post("/print", (req, res) => {
   const { queueNumber, officeName } = req.body;
 
   const message = `
-==== iQueue Ticket ====
+  Jesus Good Shepherd School
+      Transaction Slip
+========= iQueue Ticket =========
+Date: ${new Date().toLocaleDateString()} Time: ${new Date().toLocaleTimeString()}
 Office: ${officeName}
 Queue No: ${queueNumber}
------------------------
-Please wait to be called.
+---------------------------------
 
 `;
 
