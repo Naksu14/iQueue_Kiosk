@@ -35,6 +35,16 @@ export const useQueueTicket = () => {
       // Save again just to be sure (prevents null issues later)
       localStorage.setItem("queueNumberId", queueNumberId);
 
+      // 🔽 Print locally via Raspberry Pi
+      const queueNumber = res?.queueNumber || "A001";
+      const officeName = res?.officeName || "Registrar";
+
+      await fetch("http://localhost:4000/print", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ queueNumber, officeName }),
+      });
+
       // Simulate ticket printing delay
       setTimeout(() => {
         setPrintStatus("success");
