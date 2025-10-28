@@ -39,11 +39,19 @@ export const useQueueTicket = () => {
       const queueNumber = res?.queueNumber || "A001";
       const officeName = res?.officeName || "Registrar";
 
-      await fetch("http://localhost:4000/print", {
+      // 🔽 Call printer server
+      const response = await fetch("http://localhost:4000/print", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ queueNumber, officeName }),
       });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        console.error("❌ Printing failed:", data.message || "Unknown error");
+        setPrintStatus("error");
+        return;
+      }
 
       // Simulate ticket printing delay
       setTimeout(() => {
