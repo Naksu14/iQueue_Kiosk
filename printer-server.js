@@ -3,8 +3,10 @@ import bodyParser from "body-parser";
 import { writeFileSync, unlinkSync } from "fs";
 import { exec } from "child_process";
 import cors from "cors";
+import util from "util";
 
 const app = express();
+const execAsync = util.promisify(exec); // Allows async/await usage
 
 // ✅ CORS configuration
 const corsOptions = {
@@ -12,27 +14,27 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
   credentials: true,
-  optionsSuccessStatus: 204 // for legacy browsers
+  optionsSuccessStatus: 204, // for legacy browsers
 };
 
 // Apply CORS middleware globally
 app.use(cors(corsOptions));
-
-// Parse JSON requests
 app.use(bodyParser.json());
+app.options("*", cors(corsOptions)); // handle preflight
 
-// Handle OPTIONS preflight requests explicitly
-app.options("*", cors(corsOptions));
+// Health check endpoint
+app.get("/ping", (req, res) => res.json({ ok: true }));
 
 // Print endpoint
-app.post("/print", (req, res) => {
-  const { queueNumber, officeName } = req.body;
+app.post("/print", async (req, res) => {
+  try {
+    const { queueNumber, officeName } = req.body;
 
-  if (!queueNumber || !officeName) {
-    return res.status(400).json({ success: false, message: "Missing data" });
-  }
+    if (!queueNumber || !officeName) {
+      return res.status(400).json({ success: false, message: "Missing data" });
+    }
 
-  const message = `
+    const message = `
 Jesus Good Shepherd School
     Transaction Slip
 ========= iQueue Ticket =========
@@ -42,22 +44,26 @@ Queue No: ${queueNumber}
 ---------------------------------
 `;
 
-  // Use a temporary file for reliable printing
-  const tmpFile = "/tmp/ticket.txt";
-  writeFileSync(tmpFile, message);
+    // Temporary file for printing
+    const tmpFile = "/tmp/ticket.txt";
+    writeFileSync(tmpFile, message);
 
-  exec(`sudo tee /dev/usb/lp0 < ${tmpFile}`, (err, stdout, stderr) => {
-    unlinkSync(tmpFile); // cleanup
+    // Execute print command
+    await execAsync(`sudo tee /dev/usb/lp0 < ${tmpFile}`);
 
-    if (err) {
-      console.error("❌ Print error:", err);
-      return res.status(500).json({ success: false, message: "Printer error" });
-    }
+    // Cleanup
+    unlinkSync(tmpFile);
 
     console.log(`✅ Printed successfully: Queue ${queueNumber}`);
     res.json({ success: true });
-  });
+  } catch (err) {
+    console.error("❌ Print error:", err);
+    res.status(500).json({ success: false, message: "Printer error" });
+  }
 });
 
 // Start server
-app.listen(4000, () => console.log("🖨️ Printer server running on port 4000"));
+const PORT = 4000;
+app.listen(PORT, () =>
+  console.log(`🖨️ Printer server running on port ${PORT}`)
+);
