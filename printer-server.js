@@ -3,17 +3,6 @@ import bodyParser from "body-parser";
 import { exec } from "child_process";
 
 const app = express();
-const corsOptions = {
-  // ⬅️ Allow only your React app's origin
-  origin: 'http://localhost:3000', 
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // Allow cookies/authorization headers
-  optionsSuccessStatus: 204
-};
-
-// Apply the specific CORS configuration
-app.use(cors(corsOptions)); 
-
 app.use(bodyParser.json());
 
 app.post("/print", (req, res) => {
