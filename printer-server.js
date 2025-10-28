@@ -2,8 +2,13 @@ import express from "express";
 import bodyParser from "body-parser";
 import { writeFileSync, unlinkSync } from "fs";
 import { exec } from "child_process";
+import cors from "cors"; // ⬅️ IMPORT CORS
 
 const app = express();
+
+// ⬅️ USE CORS MIDDLEWARE HERE
+app.use(cors());
+
 app.use(bodyParser.json());
 
 // Print endpoint

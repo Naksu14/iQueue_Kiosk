@@ -46,11 +46,11 @@ export const useQueueTicket = () => {
         body: JSON.stringify({ queueNumber, officeName }),
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        console.error("❌ Printing failed:", data.message || "Unknown error");
-        setPrintStatus("error");
-        return;
+      if (!response.ok) {
+        // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
+        const text = await response.text();
+        console.error("Print server responded with error:", text);
+        throw new Error("Printing failed"); // ⬅️ This triggers the "error" status.
       }
 
       // Simulate ticket printing delay
