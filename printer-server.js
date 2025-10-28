@@ -6,8 +6,8 @@ const app = express();
 app.use(bodyParser.json());
 
 let printer = new ThermalPrinter.printer({
-  type: ThermalPrinter.types.EPSON,
-  interface: "/dev/ttyUSB0",
+  type: ThermalPrinter.types.EPSON, // VOZY P50 is ESC/POS-compatible
+  interface: "serial:/dev/ttyUSB0?baudrate=115200", // match CUPS config
   options: { timeout: 5000 },
 });
 
@@ -23,8 +23,14 @@ app.post("/print", async (req, res) => {
     printer.println("Please wait to be called.");
     printer.cut();
 
+    const isConnected = await printer.isPrinterConnected();
+    if (!isConnected) {
+      console.error("❌ Printer not connected or busy!");
+      return res.status(500).json({ success: false });
+    }
+
     await printer.execute();
-    console.log("✅ Printed successfully");
+    console.log("✅ Printed successfully!");
     res.json({ success: true });
   } catch (err) {
     console.error("❌ Print error:", err);
