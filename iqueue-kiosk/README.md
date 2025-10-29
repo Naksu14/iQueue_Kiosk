@@ -68,3 +68,20 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Kiosk printer server configuration
+
+The kiosk frontend calls a local printer service to print tickets. Set the printer service
+URL at build time with the `REACT_APP_PRINTER_SERVER` environment variable. Example:
+
+```bash
+# development (browser on same machine)
+REACT_APP_PRINTER_SERVER=http://localhost:4000
+
+# kiosk device reachable on the local network
+REACT_APP_PRINTER_SERVER=http://192.168.1.10:4000
+```
+
+You can add these to a `.env` file in this folder (see `.env.example`). When running `npm start`
+Create React App will inject the variable into the built app. In production, set the env variable
+when building the app (CI or build machine).
