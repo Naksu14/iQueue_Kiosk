@@ -8,6 +8,11 @@ export const useQueueTicket = () => {
   const navigate = useNavigate();
   const [printStatus, setPrintStatus] = useState("idle");
   const { transactions, clearTransactions } = useTransaction();
+  // Printer server base URL can be configured at build time via
+  // REACT_APP_PRINTER_SERVER (e.g. http://192.168.1.10:4000). ito yung network ip ng raspberry pi
+  // Falls back to localhost for development on the same machine.
+  const PRINTER_SERVER =
+    process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
 
   const handlePrint = async () => {
     if (!transactions || transactions.length === 0) {
@@ -36,11 +41,11 @@ export const useQueueTicket = () => {
 
       console.log(" Transactions created successfully:", res);
       // 🔽 Print locally via Raspberry Pi
-      const queueNumber = res?.queueNumber || "A001";
-      const officeName = res?.officeName || "Registrar";
+      const queueNumber = localStorage.getItem("queueNumber") || "0000";
+      const officeName = queueNumberId?.office || "office ";
 
-      // 🔽 Call printer server
-      const response = await fetch("http://192.168.1.50:4000/print", {
+          // 🔽 Call printer server (configurable via REACT_APP_PRINTER_SERVER)
+      const response = await fetch(`${PRINTER_SERVER}/print`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ queueNumber, officeName }),
