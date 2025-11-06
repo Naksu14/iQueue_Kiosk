@@ -40,23 +40,25 @@ export const useQueueTicket = () => {
       localStorage.setItem("queueNumberId", queueNumberId);
 
       console.log(" Transactions created successfully:", res);
-      // 🔽 Print locally via Raspberry Pi
-      const queueNumber = localStorage.getItem("queueNumber") || "0000";
+      //  Print locally via Raspberry Pi
+      const queueNumber = localStorage.getItem("queueNumber");
       const officeName = queueNumberId?.office || "office ";
 
-          // 🔽 Call printer server (configurable via REACT_APP_PRINTER_SERVER)
-      const response = await fetch(`${PRINTER_SERVER}/print`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ queueNumber, officeName }),
-      });
+      console.log(` Printing ticket: [${queueNumber}] for ${officeName}`);
 
-      if (!response.ok) {
-        // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
-        const text = await response.text();
-        console.error("Print server responded with error:", text);
-        throw new Error("Printing failed"); // ⬅️ This triggers the "error" status.
-      }
+      //  Call printer server (configurable via REACT_APP_PRINTER_SERVER) ==============================================
+      // const response = await fetch(`${PRINTER_SERVER}/print`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ queueNumber, officeName }),
+      // });
+
+      // if (!response.ok) {
+      //   // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
+      //   const text = await response.text();
+      //   console.error("Print server responded with error:", text);
+      //   throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
+      // }
 
       // Simulate ticket printing delay
       setTimeout(() => {
@@ -82,15 +84,15 @@ export const useQueueTicket = () => {
             //console.log(" Updating queue status → waiting:", safeQueueId);
             try {
               await updateQueueNoStatus(safeQueueId, "waiting");
-              //console.log(" Queue status updated successfully!");
+              console.log(" Queue status updated successfully!");
             } catch (error) {
-              console.error("❌ Failed to update queue status:", error);
+              console.error(" Failed to update queue status:", error);
             }
           }, 20 * 1000);
         }, 5000);
       }, 3000);
     } catch (err) {
-      console.error("❌ Failed to create transactions:", err);
+      console.error(" Failed to create transactions:", err);
       setPrintStatus("error");
     }
   };

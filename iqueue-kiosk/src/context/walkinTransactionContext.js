@@ -30,7 +30,7 @@ export const TransactionProvider = ({ children }) => {
       transactionDetails: request.name,
       copies: 1,
       fee: request.amount > 0 ? request.amount : "0",
-      paymentStatus: request.amount > 0 ? "Unpaid" : "n/a",
+      paymentStatus: request.amount > 0 ? "Unpaid" : null,
       status: "pending",
       estimatedDays: null,
       auditBy: null,

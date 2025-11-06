@@ -56,7 +56,7 @@ Queue No: ${queueNumber}
 
     // Cleanup
     unlinkSync(tmpFile);
-    console.log(`✅ Printed successfully: Queue ${queueNumber}`);
+    console.log(` Printed successfully: Queue ${queueNumber}`);
     res.json({ success: true });
   } catch (err) {
     console.error("❌ Print error:", err);

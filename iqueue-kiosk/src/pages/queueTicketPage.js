@@ -9,41 +9,41 @@ const QueueTicketPage = () => {
   const { printStatus, handlePrint, handleTryAgain } = useQueueTicket();
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <header className="mb-1 text-center">
+    <div className="flex flex-col items-center justify-center p-6">
+      <header className="text-center">
         <div className="flex gap-2 justify-center">
           <div className="text-gray-500 text-3xl">
             <FaTicketAlt />
           </div>
-          <SubHeader text="Your Queueing Ticket" className="font-bold" />
+          <SubHeader text="Your Queueing Ticket" className="font-bold uppercase" />
         </div>
         <p className="text-gray-600 text-sm">
           Present your ticket in transaction office
         </p>
       </header>
 
-      <div className="flex gap-4 w-full justify-center items-center">
-        <div className="flex flex-col items-center justify-center rounded-lg py-2 w-44">
+      <div className="flex gap-4 w-full justify-center items-center mt-8">
+        <div className="flex flex-col items-center justify-center rounded-lg py-2 w-64">
           {printStatus === "idle" && (
             <Button
-              className="w-full h-14 flex flex-row items-center justify-center my-6"
+              className="w-full h-14 flex  flex-row rounded-lg items-center justify-center my-6"
               onClick={handlePrint}
             >
-              <h2 className="font-semibold text-lg ml-3">Print</h2>
+              <h2 className="font-semibold text-2xl">PRINT</h2>
             </Button>
           )}
 
           {printStatus === "waiting" && (
             <>
-              <ImSpinner2 className="animate-spin text-5xl text-gray-400 my-6" />
-              <span className="text-gray-600">Printing ticket...</span>
+              <ImSpinner2 className="animate-spin text-7xl text-gray-400 my-6" />
+              <span className="text-gray-600 text-xl">Printing ticket...</span>
             </>
           )}
 
           {printStatus === "success" && (
             <>
-              <FaCheckCircle className="text-5xl text-green-500 my-6" />
-              <span className="text-green-600 font-semibold">
+              <FaCheckCircle className="text-7xl text-green-500 my-6" />
+              <span className="text-green-600 text-xl font-semibold">
                 Printed Successfully!
               </span>
             </>
@@ -51,14 +51,14 @@ const QueueTicketPage = () => {
 
           {printStatus === "error" && (
             <>
-              <FaTimesCircle className="text-5xl text-red-500 mb-2" />
-              <span className="text-red-600 font-normal text-sm text-center mb-2">
+              <FaTimesCircle className="text-7xl text-red-500 mb-2" />
+              <span className="text-red-600 font-normal text-xl text-center mb-2">
                 Ticket printing failed.
                 <br />
                 Please try again.
               </span>
               <Button
-                className="w-full h-10 font-semibold mt-1"
+                className="w-full h-10 text-xl font-semibold mt-2"
                 onClick={handleTryAgain}
               >
                 Try Again
