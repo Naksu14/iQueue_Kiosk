@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import { exec } from "child_process";
 import cors from "cors";
 import util from "util";
-import { generateQRCodeASCII } from "./generate-qrcode.js";
+import { printTicketWithQR } from "./print-escpos.js";
 
 const app = express();
 const execAsync = util.promisify(exec); // Allows async/await usage
@@ -60,20 +60,8 @@ app.post("/print", async (req, res) => {
     message += `      Thank you for using iQueue!\n`;
     message += `================================\n\n`;
 
-    // Generate QR code as ASCII art and append to message
-    const qrPayload = JSON.stringify({ code: transactionCode });
-    const qrAscii = await generateQRCodeASCII(qrPayload);
-    message += qrAscii + "\n";
-
-    // Temporary file for printing
-    const tmpFile = "/tmp/ticket.txt";
-    writeFileSync(tmpFile, message);
-
-    // Execute print command
-    await execAsync(`sudo tee /dev/usb/lp0 < ${tmpFile}`);
-
-    // Cleanup
-    unlinkSync(tmpFile);
+    // Print ticket and QR code using ESC/POS
+    await printTicketWithQR(message, transactionCode);
     console.log(` Printed successfully: Queue ${queueNumber}`);
     res.json({ success: true });
   } catch (err) {
