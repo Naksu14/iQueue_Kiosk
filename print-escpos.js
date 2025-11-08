@@ -1,24 +1,37 @@
-import escpos from "escpos";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const escpos = require("escpos");
+const escposUsb = require("escpos-usb");
 import QRCode from "qrcode";
-import { createWriteStream } from "fs";
 
-escpos.USB = require("escpos-usb");
+escpos.USB = escposUsb;
 
-export async function printTicketWithQR(message, transactionCode) {
-  // Generate QR code as PNG buffer
-  const qrBuffer = await QRCode.toBuffer(
-    JSON.stringify({ code: transactionCode }),
-    { type: "png", width: 200 }
-  );
+// Print the ticket. Returns a Promise that resolves when printing completes or rejects on error.
+export function printTicketWithQR(message, transactionCode) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Generate QR code as PNG buffer (kept here for future use)
+      // const qrBuffer = await QRCode.toBuffer(JSON.stringify({ code: transactionCode }), { type: "png", width: 200 });
 
-  // Connect to USB printer
-  const device = new escpos.USB();
-  const printer = new escpos.Printer(device);
+      // Connect to USB printer
+      const device = new escpos.USB();
+      const printer = new escpos.Printer(device);
 
-  device.open(function () {
-    printer.text(message);
-    printer.image(qrBuffer, "s8");
-    printer.cut();
-    printer.close();
+      device.open(function (err) {
+        if (err) return reject(err);
+        try {
+          printer.align("lt");
+          printer.text(message);
+          // Image printing (QR) is disabled for now — implement when escpos image loader is available.
+          printer.cut();
+          printer.close();
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    } catch (err) {
+      reject(err);
+    }
   });
 }

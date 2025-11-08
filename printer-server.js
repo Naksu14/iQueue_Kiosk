@@ -4,7 +4,28 @@ import bodyParser from "body-parser";
 import { exec } from "child_process";
 import cors from "cors";
 import util from "util";
-import { printTicketWithQR } from "./print-escpos.js";
+import qrcode from "qrcode-terminal";
+
+// Build ESC/POS QR code bytes for a UTF-8 string without using native modules.
+// Uses the standard GS ( k ... ) sequence to store and print QR data on most ESC/POS printers.
+function buildEscposQRCode(data, size = 6, errorCorrection = 0x30) {
+  const dataBuf = Buffer.from(data, "utf8");
+  // Select model: 2
+  const modelCmd = Buffer.from([0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00]);
+  // Set module size
+  const sizeCmd = Buffer.from([0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, size]);
+  // Set error correction level (48..51 => levels L..H typically)
+  const errorCmd = Buffer.from([0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, errorCorrection]);
+  // Store data in the symbol storage area
+  const len = dataBuf.length + 3;
+  const pL = len & 0xFF;
+  const pH = (len >> 8) & 0xFF;
+  const storeCmd = Buffer.from([0x1D, 0x28, 0x6B, pL, pH, 0x31, 0x50, 0x30]);
+  // Print the symbol
+  const printCmd = Buffer.from([0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30]);
+
+  return Buffer.concat([modelCmd, sizeCmd, errorCmd, storeCmd, dataBuf, printCmd]);
+}
 
 const app = express();
 const execAsync = util.promisify(exec); // Allows async/await usage
@@ -35,33 +56,76 @@ app.post("/print", async (req, res) => {
       return res.status(400).json({ success: false, message: "Missing data" });
     }
 
-    let message = `\n================================\n`;
-    message += `  Jesus Good Shepherd School\n`;
-    message += `      Transaction Slip\n`;
-    message += `--------- iQueue Ticket --------\n`;
-    message += `Date: ${new Date().toLocaleDateString()} Time: ${new Date().toLocaleTimeString()}\n`;
-    message += `Queue No: ${queueNumber}\n`;
-    message += `--------------------------------\n`;
-    message += `Transaction(s):\n`;
+    // Build ticket header up to the 'Queue No:' label. We'll print the queue number enlarged
+    const header = `\n================================\n` +
+      `  Jesus Good Shepherd School\n` +
+      `      Transaction Slip\n` +
+      `--------- iQueue Ticket --------\n` +
+      `Date: ${new Date().toLocaleDateString()} Time: ${new Date().toLocaleTimeString()}\n` +
+      `     \n `; // queueNumber will be printed enlarged
 
-    // Print each transaction detail
+    const afterQueue = `\n--------------------------------\n` +
+      `Transaction(s):\n`;
+
+    // Build transaction lines
+    let txLines = "";
     for (let i = 0; i < transactionArray.length; i++) {
       const t = transactionArray[i];
-      message += `${i + 1}. ${t.transactionDetails || ""}\n`;
-      message += `   ${t.officeName || ""}\n`;
-      if (t.fee) message += `   Fee: Php ${t.fee}\n`;
-      if (t.paymentStatus) message += `   Payment: ${t.paymentStatus}\n`;
-      message += `\n`;
+      txLines += `${i + 1}. ${t.transactionDetails || ""}\n`;
+      if (t.fee) txLines += `   Fee: Php ${t.fee}\n`;
     }
 
-    message += `--------------------------------\n`;
-    message += `Transaction Code: ${transactionCode}\n`;
-    message += `--------------------------------\n`;
-    message += `      Thank you for using iQueue!\n`;
-    message += `================================\n\n`;
+    const footer = `--------------------------------\n` +
+      ` T-Code: ${transactionCode}\n` +
+      `--------------------------------\n` +
+      `   Thank you for using iQueue!\n` +
+      `================================\n\n`;
 
-    // Print ticket and QR code using ESC/POS
-    await printTicketWithQR(message, transactionCode);
+  // Build QR payload JSON as requested: {"Code":"..."}
+  const qrPayload = JSON.stringify({Code: transactionCode });
+  console.log("QR Code for ticket (console):");
+  qrcode.generate(qrPayload, { small: true });
+
+  // ESC/POS: set double width & height for the queue number using GS ! n (0x1D 0x21 n)
+  const GS_SIZE_2X = Buffer.from([0x1D, 0x21, 0x11]); // 2x width & 2x height
+  const GS_SIZE_NORMAL = Buffer.from([0x1D, 0x21, 0x00]); // reset
+  // ESC/POS alignment: ESC a n  (0 left, 1 center, 2 right)
+  const ESC_ALIGN_CENTER = Buffer.from([0x1B, 0x61, 0x01]);
+  const ESC_ALIGN_LEFT = Buffer.from([0x1B, 0x61, 0x00]);
+
+  const beforeBuf = Buffer.from(header, "utf8");
+  const queueBuf = Buffer.from(`${queueNumber}\n`, "utf8");
+  const qrBuf = buildEscposQRCode(qrPayload, 6, 0x30); // size=6, error level L
+  const afterBuf = Buffer.from(afterQueue + txLines + footer, "utf8");
+
+    // Center the QR block using ESC a 1, then reset alignment to left
+    const LF = Buffer.from([0x0A]);
+    const finalBuf = Buffer.concat([
+      beforeBuf,
+      // Center and print the enlarged queue number
+      ESC_ALIGN_CENTER,
+      GS_SIZE_2X,
+      queueBuf,
+      GS_SIZE_NORMAL,
+      LF,
+      ESC_ALIGN_LEFT,
+      // Center QR afterwards
+      ESC_ALIGN_CENTER,
+      qrBuf,
+      LF,
+      ESC_ALIGN_LEFT,
+      afterBuf,
+    ]);
+
+  // Temporary file for printing (binary)
+  const tmpFile = "/tmp/ticket.txt";
+  writeFileSync(tmpFile, finalBuf);
+
+    // Execute print command
+    await execAsync(`sudo tee /dev/usb/lp0 < ${tmpFile}`);
+
+    // Cleanup
+    unlinkSync(tmpFile);
     console.log(` Printed successfully: Queue ${queueNumber}`);
     res.json({ success: true });
   } catch (err) {
@@ -77,3 +141,4 @@ const HOST = "0.0.0.0"; // bind to all interfaces so remote browsers on the kios
 app.listen(PORT, HOST, () => {
   console.log(` Printer server running on ${HOST}:${PORT}`);
 });
+
