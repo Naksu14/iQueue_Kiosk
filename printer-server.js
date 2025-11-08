@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import { exec } from "child_process";
 import cors from "cors";
 import util from "util";
-import qrcode from "qrcode-terminal";
+import { generateQRCodeASCII } from "./generate-qrcode.js";
 
 const app = express();
 const execAsync = util.promisify(exec); // Allows async/await usage
@@ -59,10 +59,11 @@ app.post("/print", async (req, res) => {
     message += `--------------------------------\n`;
     message += `      Thank you for using iQueue!\n`;
     message += `================================\n\n`;
-    // Print QR code to console (contains only transaction code)
+
+    // Generate QR code as ASCII art and append to message
     const qrPayload = JSON.stringify({ code: transactionCode });
-    console.log("QR Code for ticket:");
-    qrcode.generate(qrPayload, { small: true });
+    const qrAscii = await generateQRCodeASCII(qrPayload);
+    message += qrAscii + "\n";
 
     // Temporary file for printing
     const tmpFile = "/tmp/ticket.txt";
