@@ -40,34 +40,87 @@ const InputInformation = () => {
             <SubHeader text="Step 4: Help us identify and process your request faster" />
           </div>
 
-          {/* Full Name */}
-          <div className="mb-4">
-            <label className="block font-semibold mb-1">
-              Full Name of Student <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              onFocus={handleFocus}
-              className="w-full border rounded-md px-4 py-3 bg-gray-100"
-              placeholder="e.g. Juan Carlos Jr Rizal"
-              required
-            />
+           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div className="col-span-2">
+              <label className="block font-semibold mb-1">
+              ID number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="studentLrn"
+                value={formData.studentLrn}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                className="w-full border rounded-md px-4 py-3 bg-gray-100"
+                placeholder="LRN | Student number"
+                required
+              />
+            </div>
+
+            {/* Alumni Checkbox */}
+            <div className="flex flex-col">
+              <label className="font-semibold mr-3">Alumni</label>
+              <div className="flex items-center h-14">
+                <input
+                  type="checkbox"
+                  name="isAlumni"
+                  checked={formData.isAlumni}
+                  onChange={handleChange}
+                  className="w-5 h-5 accent-green-600"
+                />
+                <span className="ml-2 text-sm text-gray-600">Check if yes</span>
+              </div>
+            </div>
           </div>
 
-          {/* Alumni Checkbox */}
-          <div className="flex items-center mb-3">
-            <label className="font-semibold mr-3">Alumni</label>
-            <input
-              type="checkbox"
-              name="isAlumni"
-              checked={formData.isAlumni}
-              onChange={handleChange}
-              className="w-5 h-5 accent-green-600"
-            />
-            <span className="ml-2 text-sm text-gray-600">Check if yes</span>
+          <div className="flex gap-2 mb-4">
+            <div>
+              <label className="block font-semibold mb-1">
+              First Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                className="w-full border rounded-md px-4 py-3 bg-gray-100"
+                placeholder="first name"
+                required
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">
+              Last Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                className="w-full border rounded-md px-4 py-3 bg-gray-100"
+                placeholder="last name"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold mb-1">
+              Middle Name 
+              </label>
+              <input
+                type="text"
+                name="middleName"
+                value={formData.middleName}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                className="w-full border rounded-md px-4 py-3 bg-gray-100"
+                placeholder="middle name(if applicable)"
+                required
+              />
+            </div>
+
           </div>
 
           {/* Grade / Section / School Year */}
@@ -104,7 +157,7 @@ const InputInformation = () => {
                 onChange={handleChange}
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="e.g. Shepherd"
+                placeholder="section"
               />
             </div>
 

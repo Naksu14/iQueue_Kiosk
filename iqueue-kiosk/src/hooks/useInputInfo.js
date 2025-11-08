@@ -9,7 +9,10 @@ export const useInputInfo = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstname: "",
+    lastName: "",
+    middleName: "",
+    studentLrn: "",
     isAlumni: false,
     grade: "",
     section: "",
