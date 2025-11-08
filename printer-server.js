@@ -4,6 +4,8 @@ import bodyParser from "body-parser";
 import { exec } from "child_process";
 import cors from "cors";
 import util from "util";
+import qrcode from "qrcode-terminal";
+
 const app = express();
 const execAsync = util.promisify(exec); // Allows async/await usage
 
@@ -18,36 +20,51 @@ const corsOptions = {
   optionsSuccessStatus: 204, // for legacy browsers
 };
 
-
-
-  // Apply CORS middleware globally
+// Apply CORS middleware globally
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
-// Note: app.use(cors(...)) above already handles CORS globally including preflight.
-// Removing app.options("*", ...) because certain versions of path-to-regexp
-// can throw when given a bare "*" path (Missing parameter name at index 1).
 
 // Health check endpoint
 app.get("/ping", (req, res) => res.json({ ok: true }));
 
 app.post("/print", async (req, res) => {
   try {
-    const { queueNumber, officeName } = req.body;
+    const { queueNumber, transactionCode, transactionArray } = req.body;
 
-    if (!queueNumber || !officeName) {
+    if (!queueNumber || !transactionCode || !transactionArray) {
       return res.status(400).json({ success: false, message: "Missing data" });
     }
-  const message = `
-  Jesus Good Shepherd School
-      Transaction Slip
-========= iQueue Ticket =========
-Date: ${new Date().toLocaleDateString()} Time: ${new Date().toLocaleTimeString()}
-Office: ${officeName}
-Queue No: ${queueNumber}
----------------------------------
 
-`;
-// Temporary file for printing
+    let message = `\n================================\n`;
+    message += `  Jesus Good Shepherd School\n`;
+    message += `      Transaction Slip\n`;
+    message += `--------- iQueue Ticket --------\n`;
+    message += `Date: ${new Date().toLocaleDateString()} Time: ${new Date().toLocaleTimeString()}\n`;
+    message += `Queue No: ${queueNumber}\n`;
+    message += `--------------------------------\n`;
+    message += `Transaction(s):\n`;
+
+    // Print each transaction detail
+    for (let i = 0; i < transactionArray.length; i++) {
+      const t = transactionArray[i];
+      message += `${i + 1}. ${t.transactionDetails || ""}\n`;
+      message += `   ${t.officeName || ""}\n`;
+      if (t.fee) message += `   Fee: Php ${t.fee}\n`;
+      if (t.paymentStatus) message += `   Payment: ${t.paymentStatus}\n`;
+      message += `\n`;
+    }
+
+    message += `--------------------------------\n`;
+    message += `Transaction Code: ${transactionCode}\n`;
+    message += `--------------------------------\n`;
+    message += `      Thank you for using iQueue!\n`;
+    message += `================================\n\n`;
+    // Print QR code to console (contains only transaction code)
+    const qrPayload = JSON.stringify({ code: transactionCode });
+    console.log("QR Code for ticket:");
+    qrcode.generate(qrPayload, { small: true });
+
+    // Temporary file for printing
     const tmpFile = "/tmp/ticket.txt";
     writeFileSync(tmpFile, message);
 
@@ -62,7 +79,6 @@ Queue No: ${queueNumber}
     console.error("❌ Print error:", err);
     res.status(500).json({ success: false, message: "Printer error" });
   }
-
 });
 
 // Start server

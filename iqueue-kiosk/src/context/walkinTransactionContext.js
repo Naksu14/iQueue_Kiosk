@@ -37,7 +37,7 @@ export const TransactionProvider = ({ children }) => {
       steps: [
         {
           stepNumber: 1,
-          stepName: "Pending",
+          stepName: "pending",
           instruction: "Wait",
           auditBy: null,
         },

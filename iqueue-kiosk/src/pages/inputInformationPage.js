@@ -72,23 +72,27 @@ const InputInformation = () => {
 
           {/* Grade / Section / School Year */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-            <div>
+            <div className="relative">
               <label className="block font-semibold mb-1">
                 Grade Level<span className="text-red-500">*</span>
               </label>
-              <input
-                type="number"
+              <select
                 name="grade"
                 value={formData.grade}
-                onChange={(e) => {
-                  const value = e.target.value.slice(0, 2); // limit to 2 digits
-                  handleChange({ target: { name: "grade", value } });
-                }}
-                onFocus={handleFocus}
-                className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="e.g. 12"
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-3 bg-gray-100 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 custom-scroll-select"
+                style={{ maxHeight: "220px", overflowY: "auto" }}
                 required
-              />
+              >
+                <option value="" disabled>
+                  Select grade level
+                </option>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    Grade {i + 1}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

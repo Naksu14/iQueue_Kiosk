@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createUserTransaction } from "../services/dbServices/createTransactionService";
 import { useTransaction } from "../context/walkinTransactionContext";
 import { updateQueueNoStatus } from "../services/dbServices/addQueueNumber";
-
+import { getOfficeById } from "../services/dbServices/officeKioskService";
 export const useQueueTicket = () => {
   const navigate = useNavigate();
   const [printStatus, setPrintStatus] = useState("idle");
@@ -26,39 +26,72 @@ export const useQueueTicket = () => {
       //console.log("Submitting transactions:", transactions);
 
       // Send transactions to backend
-      const res = await createUserTransaction(transactions);
+      const transactionArray = await createUserTransaction(transactions);
+      // console.log(" Transactions created:", res);
 
       //  Get queueNumberId from backend or localStorage (fallback)
       const queueNumberId =
-        res?.queueNumberId || localStorage.getItem("queueNumberId");
-
-      if (!queueNumberId) {
-        console.warn(" queueNumberId missing! Saving fallback...");
-      }
+        transactionArray?.queueNumberId ||
+        localStorage.getItem("queueNumberId");
 
       // Save again just to be sure (prevents null issues later)
       localStorage.setItem("queueNumberId", queueNumberId);
 
-      console.log(" Transactions created successfully:", res);
-      //  Print locally via Raspberry Pi
+      // Print locally via Raspberry Pi
+      const transactionCode = localStorage.getItem("transactionCode");
       const queueNumber = localStorage.getItem("queueNumber");
-      const officeName = queueNumberId?.office || "office ";
+      const date = new Date().toLocaleDateString();
+      const time = new Date().toLocaleTimeString();
 
-      console.log(` Printing ticket: [${queueNumber}] for ${officeName}`);
+      // Assuming `res` contains an array of transactions  ============================================== Console log ticket details
+      console.log("\n===============================================");
+      console.log("           Jesus Good Shepherd School");
+      console.log("              Transaction Slip");
+      console.log("------------------------------------------------");
+      console.log(`Date: ${date}             Time: ${time}`);
+      console.log("");
+      console.log(`               Queue No: ${queueNumber}`);
+      console.log("------------------------------------------------");
+      console.log("Transaction:");
 
-      //  Call printer server (configurable via REACT_APP_PRINTER_SERVER) ==============================================
+      if (Array.isArray(transactionArray) && transactionArray.length > 0) {
+        for (let i = 0; i < transactionArray.length; i++) {
+          const t = transactionArray[i];
+          const office = await getOfficeById(t.office.office_id);
+          console.log(`${office.office_name}`);
+          console.log(`   ${t.transactionDetails}`);
+          if (t.fee) console.log(`   Fee: Php ${t.fee}`);
+          console.log(""); // spacing between transactions
+        }
+      }
+
+      console.log("------------------------------------------------");
+      console.log(`Transaction Code: ${transactionCode}`);
+      console.log("------------------------------------------------");
+      console.log("      Thank you for using iQueue!");
+      console.log("===============================================\n");
+
       // const response = await fetch(`${PRINTER_SERVER}/print`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ queueNumber, officeName }),
-      // });
+      const payload = {
+        queueNumber,
+        transactionCode,
+        transactionArray,
+      };
 
-      // if (!response.ok) {
-      //   // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
-      //   const text = await response.text();
-      //   console.error("Print server responded with error:", text);
-      //   throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
-      // }
+      //  Call printer server (configurable via REACT_APP_PRINTER_SERVER) ============================================== actual print call
+      const response = await fetch(`${PRINTER_SERVER}/print`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
+        const text = await response.text();
+        console.error("Print server responded with error:", text);
+        setPrintStatus("error");
+        throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
+      }
 
       // Simulate ticket printing delay
       setTimeout(() => {
