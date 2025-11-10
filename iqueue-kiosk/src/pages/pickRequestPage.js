@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaQrcode, FaTimesCircle } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
@@ -26,6 +26,51 @@ const PickRequestPage = () => {
 
   const PRINTER_SERVER =
     process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
+
+  // Scanner server (node process on the Pi that reads the USB scanner stdin)
+  const SCANNER_SERVER =
+    process.env.REACT_APP_SCANNER_SERVER || "http://localhost:4001";
+
+  // Helper: parse the raw scanned payload. Many QR scanners output plain text,
+  // but some systems embed JSON like '{"Code":"ABC-123"}'. This helper will
+  // attempt to normalize those formats and return the extracted code string.
+  const parseScannedCode = (raw) => {
+    if (!raw) return "";
+    let s = String(raw).trim();
+
+    // Remove surrounding quotes if the scanner appended them
+    if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+      s = s.slice(1, -1).trim();
+    }
+
+    // Try JSON parse if it looks like JSON
+    if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))) {
+      try {
+        const obj = JSON.parse(s);
+        // Common keys that might carry the code
+        const candidates = [
+          obj.Code,
+          obj.code,
+          obj.transactionCode,
+          obj.transaction_code,
+          obj.qr,
+          obj.value,
+        ];
+        for (const c of candidates) {
+          if (typeof c === 'string' && c.trim()) return c.trim();
+        }
+        // If top-level object has only one string value, return it
+        const vals = Object.values(obj).filter(v => typeof v === 'string' && v.trim());
+        if (vals.length === 1) return vals[0].trim();
+      } catch (err) {
+        // fallthrough to return raw string
+        console.warn('Unable to JSON-parse scanned payload:', err.message);
+      }
+    }
+
+    // Otherwise return the trimmed raw string
+    return s;
+  };
 
   const handlePickupPrint = async () => {
     // ... (This function remains unchanged as requested)
@@ -132,6 +177,146 @@ const PickRequestPage = () => {
     } catch (error) {
       console.error("❌ Error during scan:", error);
       setScanStatus("error");
+    }
+  };
+
+  // Trigger a hardware scan via the Pi scanner server.
+  // POST /api/trigger-scan will wait until the next barcode is read and return it.
+  const triggerScan = async () => {
+    if (scanStatus !== "idle") return;
+    setScanStatus("waiting");
+
+    try {
+        // Enforce a 10s client-side timeout to match server behavior and UI expectations
+        const controller = new AbortController();
+        const timeoutMs = 10000; // 10 seconds
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        const res = await fetch(`${SCANNER_SERVER}/api/trigger-scan`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+        }).finally(() => clearTimeout(timeoutId));
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error("Scanner server error:", res.status, body);
+        // fallback: enable local capture (browser input) if server unavailable
+        console.warn('Falling back to local input capture');
+        setCaptureMode(true);
+        setScanStatus('waiting');
+        return;
+      }
+
+      const data = await res.json();
+      if (!data || !data.qrCode) {
+        console.error("Invalid scanner response:", data);
+        setScanStatus("error");
+        return;
+      }
+
+  const raw = data.qrCode || data.code || data.value || "";
+  const scannedCode = parseScannedCode(raw);
+  console.log("Scanned code from Pi (raw):", raw, "=> parsed:", scannedCode);
+
+  // Reuse existing flow: fetch transaction by code and populate UI
+  const transactionData = await getTransactionByCode(scannedCode);
+  const transactions = transactionData.transactions;
+  if (!transactions || transactions.length === 0) {
+    console.warn("No transactions found for scanned code:", scannedCode);
+    setScanStatus("error");
+    return;
+  }
+
+  // Filter transactions that have last step stepNumber === 3 (same validation as manual submit)
+  const filteredTransactions = transactions.filter((transaction) => {
+    const steps = transaction.steps;
+    if (!steps || steps.length === 0) return false;
+    const lastStep = steps[steps.length - 1];
+    return lastStep.stepNumber === 3;
+  });
+
+  if (filteredTransactions.length === 0) {
+    console.warn("No transactions found with stepNumber 3 for scanned code:", scannedCode);
+    setScanStatus("error");
+    return;
+  }
+
+  const first = filteredTransactions[0];
+
+  const detailsObj = {
+    id: first.personalInfo.id,
+    transactionCode: first.personalInfo.transactionCode,
+    fullName:
+      first.personalInfo.fullName ||
+      `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
+    officeId: first.office.office_id,
+    officeName: first.office.office_name,
+    transactionDetailsArr: filteredTransactions.map((t) => t.transactionDetails),
+  };
+
+  setTransactionReqDetails(detailsObj);
+  setScanStatus("success");
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        console.warn('Trigger-scan timed out after 30s');
+        // stop waiting and show error; enable local capture fallback if desired
+        setCaptureMode(true);
+        setScanStatus('error');
+        return;
+      }
+      console.error("Failed to trigger scan or process result:", err);
+      // fallback to local input capture
+      console.warn('Trigger-scan failed, falling back to local input capture:', err.message || err);
+      setCaptureMode(true);
+      setScanStatus('waiting');
+    }
+  };
+
+  // Local capture fallback: when scanner acts as keyboard (HID), capture typed input
+  const captureRef = useRef(null);
+  const [captureMode, setCaptureMode] = useState(false);
+
+  useEffect(() => {
+    if (captureMode && captureRef.current) {
+      captureRef.current.focus();
+    }
+  }, [captureMode]);
+
+  const handleScannedCode = async (raw) => {
+    const scannedCode = parseScannedCode(raw);
+    if (!scannedCode) {
+      setScanStatus('error');
+      return;
+    }
+    try {
+      const transactionData = await getTransactionByCode(scannedCode);
+      const transactions = transactionData.transactions;
+      if (!transactions || transactions.length === 0) {
+        console.warn("No transactions found for scanned code:", scannedCode);
+        setScanStatus("error");
+        setCaptureMode(false);
+        return;
+      }
+
+      const first = transactions[0];
+      const detailsObj = {
+        id: first.personalInfo.id,
+        transactionCode: first.personalInfo.transactionCode,
+        fullName:
+          first.personalInfo.fullName ||
+          `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
+        officeId: first.office.office_id,
+        officeName: first.office.office_name,
+        transactionDetailsArr: transactions.map((t) => t.transactionDetails),
+      };
+      setTransactionReqDetails(detailsObj);
+      setScanStatus('success');
+      setCaptureMode(false);
+    } catch (err) {
+      console.error('Error processing scanned code:', err);
+      setScanStatus('error');
+      setCaptureMode(false);
     }
   };
 
@@ -366,7 +551,7 @@ const PickRequestPage = () => {
           <div className="flex flex-col items-center justify-center rounded-lg py-2">
             {scanStatus === "idle" && (
               <Button
-                onClick={handleScan}
+                onClick={triggerScan}
                 className="p-8 flex items-center justify-center gap-3 rounded-xl
                   bg-gradient-to-r from-green-500 to-emerald-600
                   hover:opacity-90

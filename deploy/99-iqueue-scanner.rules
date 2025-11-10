@@ -1,0 +1,10 @@
+# udev rule to set group and mode so the kiosk user can read the scanner event device
+# Replace ATTRS{idVendor/idProduct} with values for your scanner if different (use `lsusb` to find)
+# This example matches the device seen on this Pi: vendor=ac90 product=3002
+
+SUBSYSTEM=="input", ATTRS{idVendor}=="ac90", ATTRS{idProduct}=="3002", MODE:="0660", GROUP:="input"
+
+# Also match BF SCAN devices observed in logs (vendor 9901 product 0103)
+SUBSYSTEM=="input", ATTRS{idVendor}=="9901", ATTRS{idProduct}=="0103", MODE:="0660", GROUP:="input"
+
+# If your scanner exposes a different vendor/product pair, add another rule line for it.
