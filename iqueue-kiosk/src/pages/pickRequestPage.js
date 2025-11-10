@@ -29,6 +29,7 @@ const PickRequestPage = () => {
 
   const handlePickupPrint = async () => {
     if (!transactionReqDetails) return;
+    const queueNumber = localStorage.getItem("queueNumber");
 
     const printPayload = {
       office: transactionReqDetails.officeName,
@@ -36,6 +37,7 @@ const PickRequestPage = () => {
       personalId: transactionReqDetails.id,
       transactionCode: transactionReqDetails.transactionCode,
       pickUpTransaction: transactionReqDetails.transactionDetailsArr,
+      queueNumber: queueNumber,
     };
 
     console.log("Submitting pick-up print request:", printPayload);
@@ -51,32 +53,32 @@ const PickRequestPage = () => {
       console.error("Print server responded with error:", text);
       setScanStatus("error");
       throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
-    } 
+    }
     try {
+      setTimeout(() => {
         setTimeout(() => {
-          setTimeout(() => {
-            const queueNumberId = localStorage.getItem("queueNumberId");
+          const queueNumberId = localStorage.getItem("queueNumberId");
 
-            navigate("/");
+          navigate("/");
 
-            setTimeout(async () => {
-              if (!queueNumberId) {
-                console.warn(" No valid queue ID found for status update!");
-                return;
-              }
-              try {
-                await updateQueueNoStatus(queueNumberId, "waiting");
-                console.log(" Queue status updated successfully!");
-              } catch (error) {
-                console.error(" Failed to update queue status:", error);
-              }
-            }, 30000); // 30 seconds delay
-          }, 5000); // Wait before navigating home
-        }, 3000); // Simulated delay for printing
-      } catch (error) {
-        console.error("Error creating queue number:", error);
-        setScanStatus("error");
-      }
+          setTimeout(async () => {
+            if (!queueNumberId) {
+              console.warn(" No valid queue ID found for status update!");
+              return;
+            }
+            try {
+              await updateQueueNoStatus(queueNumberId, "waiting");
+              console.log(" Queue status updated successfully!");
+            } catch (error) {
+              console.error(" Failed to update queue status:", error);
+            }
+          }, 30000); // 30 seconds delay
+        }, 5000); // Wait before navigating home
+      }, 3000); // Simulated delay for printing
+    } catch (error) {
+      console.error("Error creating queue number:", error);
+      setScanStatus("error");
+    }
   };
 
   const handleScan = async () => {
@@ -165,6 +167,7 @@ const PickRequestPage = () => {
       try {
         const queueNumberId = await createQueueNumber(queuePayload);
         localStorage.setItem("queueNumberId", queueNumberId.id);
+        localStorage.setItem("queueNumber", queueNumberId.queueNumber);
       } catch (error) {
         console.error(" Error creating queue number:", error);
       }
