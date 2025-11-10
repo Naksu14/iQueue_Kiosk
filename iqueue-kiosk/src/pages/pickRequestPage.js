@@ -27,16 +27,36 @@ const PickRequestPage = () => {
   const PRINTER_SERVER =
     process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
 
+  // Helper: sanitize and normalize transaction details array
+  const sanitizeTransactionDetails = (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .map((d) => {
+        if (d == null) return "";
+        if (typeof d === "string") return d.trim();
+        try {
+          return String(d).trim();
+        } catch (e) {
+          return "";
+        }
+      })
+      .filter(Boolean);
+  };
+
   const handlePickupPrint = async () => {
     if (!transactionReqDetails) return;
     const queueNumber = localStorage.getItem("queueNumber");
 
+    // The printer server expects: { personalId, officeName, pickupTime, transactionDetails, fee, transactionCode, queueNumber }
     const printPayload = {
-      office: transactionReqDetails.officeName,
-      pickup: true,
       personalId: transactionReqDetails.id,
+      officeName: transactionReqDetails.officeName,
+      pickupTime: new Date().toLocaleString(),
+      // send transaction details as a single string for pickup ticket
+      transactionDetails: Array.isArray(transactionReqDetails.transactionDetailsArr)
+        ? transactionReqDetails.transactionDetailsArr.join("; ")
+        : transactionReqDetails.transactionDetailsArr || "",
       transactionCode: transactionReqDetails.transactionCode,
-      pickUpTransaction: transactionReqDetails.transactionDetailsArr,
       queueNumber: queueNumber,
     };
 
@@ -103,8 +123,10 @@ const PickRequestPage = () => {
           `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
         officeId: first.office.office_id,
         officeName: first.office.office_name,
-        // Get all transaction details
-        transactionDetailsArr: transactions.map((t) => t.transactionDetails),
+        // Get all transaction details (sanitized)
+        transactionDetailsArr: sanitizeTransactionDetails(
+          transactions.map((t) => t.transactionDetails)
+        ),
       };
 
       console.log("✅ Combined transaction details:", detailsObj);
@@ -129,9 +151,10 @@ const PickRequestPage = () => {
       // Filter transactions that have stepNumber === 3
       const filteredTransactions = transactions.filter((transaction) => {
         const steps = transaction.steps;
-        if (!steps || steps.length === 0) return false; // no steps
+        if (!Array.isArray(steps) || steps.length === 0) return false; // no steps
         const lastStep = steps[steps.length - 1]; // get the last step
-        return lastStep.stepNumber === 3;
+        // make the comparison robust if stepNumber is a string
+        return Number(lastStep.stepNumber) === 3;
       });
 
       // If no transaction has stepNumber 3, stop and show error
@@ -152,8 +175,9 @@ const PickRequestPage = () => {
           `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
         officeId: first.office.office_id,
         officeName: first.office.office_name,
-        transactionDetailsArr: filteredTransactions.map(
-          (t) => t.transactionDetails
+        // sanitized filtered details
+        transactionDetailsArr: sanitizeTransactionDetails(
+          filteredTransactions.map((t) => t.transactionDetails)
         ),
       };
       setTransactionReqDetails(detailsObj);

@@ -69,31 +69,87 @@ app.use(bodyParser.json());
 app.get("/ping", (req, res) => res.json({ ok: true }));
 
 app.post("/pickUpPrint", async (req, res) => {
-  const {
-    personalId,
-    office,
-    pickup,
-    transactionCode,
-    pickUpTransaction,
-    queueNumber,
-  } = req.body;
+  try {
+    // Accept a simple pickup payload. Required: personalId, officeName, transactionDetails, transactionCode, queueNumber
+    const {
+      officeName,
+      transactionDetails,
+      transactionCode,
+      queueNumber,
+    } = req.body;
 
-  if (!personalId || !transactionDetails) {
-    return res.status(400).json({ success: false, message: "Missing fields" });
+    if (!transactionDetails || !transactionCode || !queueNumber) {
+      return res.status(400).json({ success: false, message: "Missing fields" });
+    }
+
+    // Build a pickup ticket similar to /print but tailored for pickup
+    const header =
+      `\n================================\n` +
+      `  Jesus Good Shepherd School\n` +
+      `        Pick-up Slip\n` +
+      `--------- iQueue Ticket --------\n` +
+      `Date:${new Date().toLocaleDateString()} Time:${new Date().toLocaleTimeString()}\n` +
+      `\n`;
+
+    const infoLines = `Office: ${officeName || ""}\n`;
+
+    const txLines = `Documents:\n ${transactionDetails}`;
+
+    const footer =
+      `--------------------------------\n` +
+      ` T-Code: ${transactionCode}\n` +
+      `--------------------------------\n` +
+      `   Thank you for using iQueue!\n` +
+      `================================\n\n`;
+
+    // ESC/POS alignment and sizing
+    const GS_SIZE_2X = Buffer.from([0x1d, 0x21, 0x11]);
+    const GS_SIZE_NORMAL = Buffer.from([0x1d, 0x21, 0x00]);
+    const ESC_ALIGN_CENTER = Buffer.from([0x1b, 0x61, 0x01]);
+    const ESC_ALIGN_LEFT = Buffer.from([0x1b, 0x61, 0x00]);
+    const LF = Buffer.from([0x0a]);
+
+    const beforeBuf = Buffer.from(header + infoLines, "utf8");
+    const queueBuf = Buffer.from(`${queueNumber}\n`, "utf8");
+    const afterBuf = Buffer.from(txLines + footer, "utf8");
+
+    const finalBuf = Buffer.concat([
+      beforeBuf,
+      // center & enlarge queue number
+      ESC_ALIGN_CENTER,
+      GS_SIZE_2X,
+      queueBuf,
+      GS_SIZE_NORMAL,
+      LF,
+      ESC_ALIGN_LEFT,
+      afterBuf,
+    ]);
+
+    // Write binary ticket and send to printer
+    const tmpFile = "/tmp/pickup_ticket.bin";
+    writeFileSync(tmpFile, finalBuf);
+    await execAsync(`sudo tee /dev/usb/lp0 < ${tmpFile}`);
+    try {
+      unlinkSync(tmpFile);
+    } catch (e) {}
+
+    // Build a response object (could be saved to DB instead)
+    const newTransaction = {
+      id: Date.now(),
+      personalId,
+      transactionDetails,
+      fee: fee || 0,
+      transactionCode,
+      queueNumber,
+      createdAt: new Date(),
+    };
+
+    console.log("Pick-up printed:", newTransaction);
+    res.json({ success: true, transaction: newTransaction });
+  } catch (err) {
+    console.error("❌ pickUpPrint error:", err);
+    res.status(500).json({ success: false, message: "Printer error" });
   }
-
-  // Here, you could save it to DB or memory (for demo, just echo)
-  const newTransaction = {
-    id: Date.now(),
-    personalId,
-    transactionDetails,
-    fee: fee || 0,
-    createdAt: new Date(),
-  };
-
-  console.log("New Transaction:", newTransaction);
-
-  res.json({ success: true, transaction: newTransaction });
 });
 
 app.post("/print", async (req, res) => {
@@ -110,7 +166,7 @@ app.post("/print", async (req, res) => {
       `  Jesus Good Shepherd School\n` +
       `      Transaction Slip\n` +
       `--------- iQueue Ticket --------\n` +
-      `Date: ${new Date().toLocaleDateString()} Time: ${new Date().toLocaleTimeString()}\n` +
+      `Date:${new Date().toLocaleDateString()} Time:${new Date().toLocaleTimeString()}\n` +
       `     \n `; // queueNumber will be printed enlarged
 
     const afterQueue =
