@@ -38,7 +38,6 @@ export const getTransactionByCode = async (transactionCode) => {
     const transactionData = response.data;
     return transactionData;
   } catch (error) {
-    console.error("Error fetching transaction by code:", error);
-    throw error;
+
   }
 };

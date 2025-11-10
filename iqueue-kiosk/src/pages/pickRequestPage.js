@@ -27,15 +27,31 @@ const PickRequestPage = () => {
   const PRINTER_SERVER =
     process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
 
-  
-
   const handlePickupPrint = async () => {
+    // ... (This function remains unchanged as requested)
     if (!transactionReqDetails) return;
+    const queuePayload = {
+      office: transactionReqDetails.officeName,
+      officeInvolved: [transactionReqDetails.officeName],
+      personalInfoId: transactionReqDetails.id,
+      queueType: "Walk-in",
+      pickUp: true,
+    };
+    try {
+      const queueNumberId = await createQueueNumber(queuePayload);
+      localStorage.setItem("queueNumberId", queueNumberId.id);
+      localStorage.setItem("queueNumber", queueNumberId.queueNumber);
+    } catch (error) {
+      console.error(" Error creating queue number:", error);
+    }
+
     const queueNumber = localStorage.getItem("queueNumber");
 
     const printPayload = {
       officeName: transactionReqDetails.officeName,
-      transactionDetails: Array.isArray(transactionReqDetails.transactionDetailsArr)
+      transactionDetails: Array.isArray(
+        transactionReqDetails.transactionDetailsArr
+      )
         ? transactionReqDetails.transactionDetailsArr.join("; ")
         : transactionReqDetails.transactionDetailsArr || "",
       transactionCode: transactionReqDetails.transactionCode,
@@ -51,7 +67,7 @@ const PickRequestPage = () => {
     if (!response.ok) {
       const text = await response.text();
       console.error("Print server responded with error:", text);
-      throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
+      throw new Error("Printing failed");
     }
     try {
       setTimeout(() => {
@@ -81,6 +97,7 @@ const PickRequestPage = () => {
   };
 
   const handleScan = async () => {
+    // ... (This function remains unchanged)
     if (scanStatus !== "idle") return;
     setScanStatus("waiting");
 
@@ -88,8 +105,11 @@ const PickRequestPage = () => {
       const transactionData = await getTransactionByCode("demo"); // Replace with actual scanned code
       const transactions = transactionData.transactions;
 
-      if (!transactions || transactions.length === 0)
-        throw new Error("No transactions found");
+      if (!transactions || transactions.length === 0) {
+        setScanStatus("error");
+        setTransactionReqDetails(null);
+        return;
+      }
 
       // Use the first one only for personal info & office
       const first = transactions[0];
@@ -136,6 +156,7 @@ const PickRequestPage = () => {
       // If no transaction has stepNumber 3, stop and show error
       if (filteredTransactions.length === 0) {
         console.warn("⚠️ No transactions found with stepNumber 3");
+        // **Set status to error to trigger the shared error UI**
         setScanStatus("error");
         return;
       }
@@ -156,29 +177,22 @@ const PickRequestPage = () => {
         ),
       };
       setTransactionReqDetails(detailsObj);
-      const queuePayload = {
-        office: detailsObj.officeName,
-        officeInvolved: [detailsObj.officeName],
-        personalInfoId: detailsObj.id,
-        queueType: "Walk-in",
-        pickUp: true,
-      };
-      try {
-        const queueNumberId = await createQueueNumber(queuePayload);
-        localStorage.setItem("queueNumberId", queueNumberId.id);
-        localStorage.setItem("queueNumber", queueNumberId.queueNumber);
-      } catch (error) {
-        console.error(" Error creating queue number:", error);
-      }
 
       setScanStatus("success");
     } catch (error) {
-      console.error(" Error fetching transaction:", error);
+      // **Set status to error to trigger the shared error UI**
       setScanStatus("error");
     }
   };
 
+  // Validation for manual code input
+  const isValidTransactionCode = (str) => {
+    if (!str) return false;
+    return String(str).trim().length === 17 || String(str).trim().length === 19;
+  };
+
   useEffect(() => {
+    // ... (This effect remains unchanged)
     if (scanStatus === "success" && transactionReqDetails) {
       const fetchQueueMetrics = async () => {
         const countWaiting = await getCountWaiting(
@@ -202,11 +216,13 @@ const PickRequestPage = () => {
   const handleTryAgain = () => {
     setScanStatus("idle");
     setTransactionReqDetails(null);
+    // Hide the input field if we were previously showing an error
+    setShowInput(false);
   };
 
   // --- SUCCESS STATE ---
   if (scanStatus === "success" && transactionReqDetails) {
-    // Support both array and single object
+    // ... (Success state UI remains unchanged)
     const detailsList = Array.isArray(transactionReqDetails)
       ? transactionReqDetails
       : [transactionReqDetails];
@@ -294,10 +310,18 @@ const PickRequestPage = () => {
             </ul>
           ))}
           <Button
-            className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow hover:shadow-md hover:opacity-90 transition duration-200"
+            className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow hover:shadow-md hover:opacity-90 transition duration-200 flex items-center justify-center gap-2"
             onClick={handlePickupPrint}
+            disabled={scanStatus === "waiting"}
           >
-            Print Ticket
+            {scanStatus === "waiting" ? (
+              <>
+                <ImSpinner2 className="animate-spin text-2xl text-white" />
+                <span>Printing...</span>
+              </>
+            ) : (
+              "Print Ticket"
+            )}
           </Button>
         </div>
       </div>
@@ -319,7 +343,26 @@ const PickRequestPage = () => {
       </header>
 
       <div className="flex gap-4 w-full justify-center min-h-[14rem] items-center">
-        {!showInput && (
+        {/** Conditional rendering for the error state, which now also covers manual input errors. **/}
+        {scanStatus === "error" && (
+          <div className="flex flex-col items-center p-4 bg-red-50 rounded-lg border border-red-200">
+            <FaTimesCircle className="text-5xl text-red-500 mb-3" />
+            <span className="text-red-600 font-normal text-sm text-center mb-3">
+              **QR Code not recognized or expired.**
+              <br />
+              Please try again or proceed as walk-in.
+            </span>
+            <Button
+              className="w-full h-10 font-semibold mt-1 bg-red-500 hover:bg-red-600"
+              onClick={handleTryAgain}
+            >
+              Try Again
+            </Button>
+          </div>
+        )}
+
+        {/** Only show QR/Input if not in error state and not in success state **/}
+        {scanStatus !== "error" && !showInput && (
           <div className="flex flex-col items-center justify-center rounded-lg py-2">
             {scanStatus === "idle" && (
               <Button
@@ -345,27 +388,10 @@ const PickRequestPage = () => {
                 <span className="text-gray-600">Waiting for scan...</span>
               </>
             )}
-
-            {scanStatus === "error" && (
-              <div className="flex flex-col items-center p-4 bg-red-50 rounded-lg border border-red-200">
-                <FaTimesCircle className="text-5xl text-red-500 mb-3" />
-                <span className="text-red-600 font-normal text-sm text-center mb-3">
-                  **QR Code not recognized or expired.**
-                  <br />
-                  Please try again or proceed as walk-in.
-                </span>
-                <Button
-                  className="w-full h-10 font-semibold mt-1 bg-red-500 hover:bg-red-600"
-                  onClick={handleTryAgain}
-                >
-                  Try Again
-                </Button>
-              </div>
-            )}
           </div>
         )}
 
-        {showInput && (
+        {scanStatus !== "error" && showInput && (
           <form
             className={`w-64 flex flex-col gap-3 items-center ${
               isVisible ? "-mt-32" : ""
@@ -394,10 +420,18 @@ const PickRequestPage = () => {
             />
             <Button
               onClick={() => {
+                if (!isValidTransactionCode(code)) return;
                 hideKeyboard();
                 handleManualCodeSubmit();
               }}
-              className="w-full h-12 mt-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white text-lg font-semibold rounded-lg shadow-md hover:shadow-lg active:scale-95 transition-all"
+              disabled={
+                !isValidTransactionCode(code) || scanStatus === "waiting"
+              }
+              className={`w-full h-12 mt-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white text-lg font-semibold rounded-lg shadow-md hover:shadow-lg active:scale-95 transition-all ${
+                !isValidTransactionCode(code) || scanStatus === "waiting"
+                  ? "opacity-60 cursor-not-allowed"
+                  : ""
+              }`}
             >
               Submit Code
             </Button>
@@ -406,7 +440,8 @@ const PickRequestPage = () => {
       </div>
 
       <div>
-        {!showInput && scanStatus !== "success" && scanStatus !== "waiting" && (
+        {/* Only show "Enter transaction code manually" if in IDLE state and not showing error */}
+        {!showInput && scanStatus === "idle" && (
           <button
             className="text-gray-500 underline underline-offset-1 hover:text-blue-600 transition duration-150"
             onClick={() => {
@@ -417,7 +452,8 @@ const PickRequestPage = () => {
             Enter transaction code manually
           </button>
         )}
-        {showInput && (
+        {/* Only show "Back to QR scan" if showing input field and not in error/waiting/success */}
+        {showInput && scanStatus === "idle" && (
           <button
             className="text-gray-500 underline underline-offset-1 hover:text-blue-600 transition duration-150"
             onClick={() => {
