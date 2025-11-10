@@ -64,6 +64,7 @@ const corsOptions = {
 // Apply CORS middleware globally
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
+app.use(express.json());
 
 // Health check endpoint
 app.get("/ping", (req, res) => res.json({ ok: true }));
@@ -88,12 +89,11 @@ app.post("/pickUpPrint", async (req, res) => {
       `  Jesus Good Shepherd School\n` +
       `        Pick-up Slip\n` +
       `--------- iQueue Ticket --------\n` +
-      `Date:${new Date().toLocaleDateString()} Time:${new Date().toLocaleTimeString()}\n` +
-      `\n`;
+      `Date:${new Date().toLocaleDateString()} Time:${new Date().toLocaleTimeString()}\n`;
 
-    const infoLines = `Office: ${officeName || ""}\n`;
+    const infoLines = `Office: ${officeName || ""}\n\n`;
 
-    const txLines = `Documents:\n ${transactionDetails}`;
+    const txLines = `Documents:\n ${transactionDetails}\n`;
 
     const footer =
       `--------------------------------\n` +
@@ -133,19 +133,7 @@ app.post("/pickUpPrint", async (req, res) => {
       unlinkSync(tmpFile);
     } catch (e) {}
 
-    // Build a response object (could be saved to DB instead)
-    const newTransaction = {
-      id: Date.now(),
-      personalId,
-      transactionDetails,
-      fee: fee || 0,
-      transactionCode,
-      queueNumber,
-      createdAt: new Date(),
-    };
-
-    console.log("Pick-up printed:", newTransaction);
-    res.json({ success: true, transaction: newTransaction });
+    res.json({ success: true });
   } catch (err) {
     console.error("❌ pickUpPrint error:", err);
     res.status(500).json({ success: false, message: "Printer error" });
