@@ -8,6 +8,7 @@ import { KeyboardProvider } from "./context/KeyboardContext"; // ✅ important
 import WelcomePage from "./pages/welcomePage";
 import WalkinSelectTransaction from "./pages/walkinSelectTransaction";
 import ScanningPage from "./pages/scanningPage";
+import PickRequestPage from "./pages/pickRequestPage";
 import OfficeServiceSelection from "./pages/officeServiceSelection";
 import TransactionPage from "./pages/transactionPage";
 import InputInformation from "./pages/inputInformationPage";
@@ -25,6 +26,7 @@ function App() {
               <Route path="/" element={<WelcomePage />} />
               <Route path="/WalkinSelectTransaction" element={<WalkinSelectTransaction />} />
               <Route path="/ScanningPage" element={<ScanningPage />} />
+              <Route path="/PickRequestPage" element={<PickRequestPage />} />
               <Route path="/OfficeServiceSelection" element={<OfficeServiceSelection />} />
               <Route path="/TransactionPage" element={<TransactionPage />} />
               <Route path="/InputInformation" element={<InputInformation />} />

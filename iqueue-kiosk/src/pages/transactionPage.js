@@ -111,31 +111,33 @@ const TransactionDetails = () => {
 
         {/*  Footer Section */}
         {transactions.length > 0 && (
-          <div className="flex flex-col items-center w-full max-w-[650px] mt-4 space-y-3">
-            <p className="text-gray-800 font-semibold text-base">
+          <div className="flex flex-col items-center w-full max-w-[650px] mt-2 space-y-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-gray-100">
+            {/* Total Section */}
+            <p className="text-gray-700 font-semibold text-lg tracking-wide">
               Total:{" "}
-              <span className="text-red-600 font-bold">
-                ₱ {total.toLocaleString()}
+              <span className="text-green-600 font-bold text-2xl">
+                ₱{total.toLocaleString()}
               </span>
             </p>
 
-            <div className="flex gap-3 justify-center w-full">
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
               <button
                 onClick={() => setShowCancelModal(true)}
-                className="bg-gray-300 hover:bg-green-700 active:bg-green-800 text-gray-600 text-sm font-semibold px-5 py-4 rounded-xl shadow-md w-[40%]"
+                className="w-full sm:w-[45%] px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium text-base shadow-sm hover:bg-gray-200 hover:shadow transition-all duration-200"
               >
                 Cancel
               </button>
+
               <button
-                onClick={() => {
-                  navigate("/InputInformation");
-                }}
-                className="bg-green-500 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold px-5 py-4 rounded-xl shadow-md w-[40%]"
+                onClick={() => navigate("/InputInformation")}
+                className="w-full sm:w-[45%] px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white text-white font-semibold text-base shadow-md hover:opacity-90 hover:shadow-lg active:scale-[0.98] transition-all duration-200"
               >
                 Confirm
               </button>
             </div>
           </div>
+
         )}
       </div>
 

@@ -40,7 +40,7 @@ const WalkinSelectTransaction = () => {
 
         {/* Walk-in Pick up Request */}
         <Button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/PickRequestPage")}
           className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
           <IconContainer className="p-4 bg-blue-100 text-blue-600 rounded-full mb-2">

@@ -26,7 +26,7 @@ const QueueTicketPage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-6">
+    <div className="flex flex-col items-center justify-center p-4">
       <header className="text-center">
         <div className="flex gap-2 justify-center">
           <SubHeader
@@ -43,29 +43,62 @@ const QueueTicketPage = () => {
       <div className="flex gap-4 w-full justify-center items-center">
         <div className="flex flex-col items-center justify-center rounded-lg py-2 w-64 ">
           {printStatus === "idle" && (
-            <>
-              {/* 🧾 TICKET PREVIEW */}
-              <div className="bg-gray-50 shadow-md border rounded-md p-4 mt-1 w-[320px] text-center">
-                 <h2 className="text-lg font-semibold">{ticketData.schoolName}</h2>
-                <p className="text-sm text-gray-700 font-medium mb-2">Transaction Slip</p>
+           <>
+            <div className="bg-white/90 backdrop-blur-md shadow-xl border border-gray-200 rounded-2xl p-4 mt-3 w-[320px] text-center transition-all hover:shadow-2xl hover:scale-[1.02] duration-300">
+              <h2 className="text-md font-bold text-gray-800 mb-1 tracking-tight">
+                {ticketData.schoolName}
+              </h2>
+              <p className="text-sm text-gray-500 font-medium mb-4">
+                Transaction Slip
+              </p>
 
-                <hr className="border-dashed border-gray-300 mb-3" />
+              <div className="relative flex flex-col items-center">
+                <div className="h-[1px] w-20 bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-3"></div>
 
-                <h1 className="text-4xl font-bold my-3 text-gray-800">
+                <h1 className="text-5xl font-extrabold text-gray-900 tracking-wide">
                   {ticketData.queueNumber}
                 </h1>
-                <hr className="border-dashed border-gray-300 mt-3 mb-2" />
-                <p className="text-xs text-gray-700 font-medium mt-1">
-                  Transaction Code: {ticketData.transactionCode}
+
+                <div className="h-[1px] w-20 bg-gradient-to-r from-transparent via-gray-300 to-transparent mt-3 mb-2"></div>
+
+                <p className="text-xs text-gray-600 font-medium mt-2">
+                  Transaction Code:{" "}
+                  <span className="font-semibold text-gray-800">
+                    {ticketData.transactionCode}
+                  </span>
                 </p>
               </div>
-              <Button
-                className="w-full h-14 flex flex-row rounded-lg items-center justify-center my-2"
-                onClick={handlePrint}
-              >
-                <h2 className="font-semibold text-2xl">PRINT</h2>
-              </Button>
-            </>
+            </div>
+
+            {/* 🖨️ Print Button */}
+            <button
+              onClick={handlePrint}
+              className="w-full h-14 flex items-center justify-center mt-5 rounded-full
+                bg-gradient-to-r from-blue-500 to-green-500
+                hover:from-blue-600 hover:to-green-600
+                active:scale-95 transition-all duration-300 
+                shadow-md hover:shadow-lg group"
+            >
+              <span className="text-white font-semibold text-lg flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-6 group-hover:rotate-6 transition-transform"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-4 0H10v4h4v-4z"
+                  />
+                </svg>
+                Print Ticket
+              </span>
+            </button>
+          </>
+
           )}
 
           {printStatus === "waiting" && (
@@ -93,7 +126,9 @@ const QueueTicketPage = () => {
                 Please try again.
               </span>
               <Button
-                className="w-full h-10 text-xl font-semibold mt-2"
+                className="w-full py-3 rounded-full bg-gradient-to-r from-red-500 to-pink-500 
+                        hover:from-red-600 hover:to-pink-600 text-white font-semibold text-lg 
+                        shadow-md hover:shadow-lg transition-all duration-300 active:scale-95"
                 onClick={handleTryAgain}
               >
                 Try Again

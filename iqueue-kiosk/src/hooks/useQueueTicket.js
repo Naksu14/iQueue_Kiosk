@@ -11,8 +11,7 @@ export const useQueueTicket = () => {
   // Printer server base URL can be configured at build time via
   // REACT_APP_PRINTER_SERVER (e.g. http://192.168.1.10:4000). ito yung network ip ng raspberry pi
   // Falls back to localhost for development on the same machine.
-  const PRINTER_SERVER =
-    process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
+  const PRINTER_SERVER = process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
 
   const handlePrint = async () => {
     if (!transactions || transactions.length === 0) {
@@ -71,7 +70,6 @@ export const useQueueTicket = () => {
       console.log("      Thank you for using iQueue!");
       console.log("===============================================\n");
 
-      // const response = await fetch(`${PRINTER_SERVER}/print`, {
       const payload = {
         queueNumber,
         transactionCode,
@@ -121,9 +119,9 @@ export const useQueueTicket = () => {
             } catch (error) {
               console.error(" Failed to update queue status:", error);
             }
-          }, 20 * 1000);
-        }, 5000);
-      }, 3000);
+          }, 30000);  // 30 seconds delay
+        }, 5000); // Wait before navigating home
+      }, 3000); // Simulated delay for printing
     } catch (err) {
       console.error(" Failed to create transactions:", err);
       setPrintStatus("error");

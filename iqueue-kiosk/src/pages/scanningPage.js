@@ -43,13 +43,19 @@ const ScanningPage = () => {
           <div className="flex flex-col items-center justify-center rounded-lg py-2">
             {scanStatus === "idle" && (
               <Button
-                className="w-44 h-14 flex flex-row items-center justify-center my-6"
-                onClick={handleScan}
-              >
-                <IconContainer>
-                  <FaQrcode className="text-2xl" />
-                </IconContainer>
-                <h2 className="font-semibold text-lg ml-3">Scan now</h2>
+                  onClick={handleScan}
+                  className="p-8 flex items-center justify-center gap-3 rounded-xl
+                      bg-gradient-to-r from-green-500 to-emerald-600
+                      hover:opacity-90
+                      shadow-lg hover:shadow-xl
+                      transition-all duration-300 transform active:scale-95"
+                  >
+                  <IconContainer className="bg-white p-2 rounded-full shadow-md">
+                      <FaQrcode className="text-2xl text-green-600" />
+                  </IconContainer>
+                  <span className="text-white font-semibold text-xl tracking-wide">
+                      Scan Now
+                  </span>
               </Button>
             )}
 
@@ -102,10 +108,13 @@ const ScanningPage = () => {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="Enter transaction code"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-[300px] text-center border border-gray-300 rounded px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoFocus
             />
-            <Button className="w-full h-12 font-semibold">Submit</Button>
+            <Button className="w-full h-12 bg-gradient-to-r from-blue-500 to-green-500 
+                          hover:from-blue-600 hover:to-green-600 
+                          text-white text-lg font-semibold rounded-lg 
+                          shadow-md hover:shadow-lg active:scale-95 transition-all">Submit Code</Button>
           </form>
         )}
       </div>

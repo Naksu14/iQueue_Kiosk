@@ -48,6 +48,27 @@ app.use(bodyParser.json());
 // Health check endpoint
 app.get("/ping", (req, res) => res.json({ ok: true }));
 
+app.post("/pickUpPrint", async (req, res) => {
+  const { personalId, office, pickup, transactionCode, pickUpTransaction } = req.body;
+
+  if (!personalId || !transactionDetails) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+
+  // Here, you could save it to DB or memory (for demo, just echo)
+  const newTransaction = {
+    id: Date.now(),
+    personalId,
+    transactionDetails,
+    fee: fee || 0,
+    createdAt: new Date(),
+  };
+
+  console.log("New Transaction:", newTransaction);
+
+  res.json({ success: true, transaction: newTransaction });
+});
+
 app.post("/print", async (req, res) => {
   try {
     const { queueNumber, transactionCode, transactionArray } = req.body;

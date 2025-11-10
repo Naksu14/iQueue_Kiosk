@@ -29,3 +29,16 @@ export const createUserTransaction = async (userTransaction) => {
     throw error;
   }
 };
+
+export const getTransactionByCode = async (transactionCode) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/walkin-transaction/personalInfo/${transactionCode}`
+    );
+    const transactionData = response.data;
+    return transactionData;
+  } catch (error) {
+    console.error("Error fetching transaction by code:", error);
+    throw error;
+  }
+};

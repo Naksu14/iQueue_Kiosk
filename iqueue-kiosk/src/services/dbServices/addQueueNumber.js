@@ -29,3 +29,28 @@ export const updateQueueNoStatus = async (queueNumberId, status) =>{
     throw error;
   }
 };
+
+
+// get count of waiting queue numbers
+export const getCountWaiting = async (officeName) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.get(
+    `${API_URL}/queue-number/count/waiting/${officeName}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const getAverageServiceTime = async (officeId) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.get(`${API_URL}/service-time/average-duration/${officeId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};

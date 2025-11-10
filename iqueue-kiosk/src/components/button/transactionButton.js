@@ -9,15 +9,34 @@ export default function TransactionButton({
     <button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={`fixed bottom-4 left-16 h-12 rounded-full flex items-center justify-center text-sm shadow-lg mx-1 p-2 transition-colors
-        ${
-          disabled
-            ? "bg-gray-300 cursor-not-allowed text-gray-600"
-            : "bg-blue-500 text-white hover:bg-blue-700"
-        } 
-        ${className}`}
+      className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 
+    flex items-center justify-center gap-2 px-6 h-12
+    rounded-full text-sm font-semibold tracking-wide shadow-lg 
+    transition-all duration-300 ease-in-out
+    ${
+      disabled
+        ? "bg-gray-200 text-gray-500 cursor-not-allowed shadow-none opacity-0"
+        : "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600 hover:shadow-xl active:scale-95"
+    } 
+    ${className}`}
     >
-      Your Transaction
+      <span className="flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+        Your Transaction
+      </span>
     </button>
   );
 }

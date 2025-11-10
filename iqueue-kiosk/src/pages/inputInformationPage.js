@@ -19,7 +19,7 @@ const InputInformation = () => {
     setTimeout(() => {
       e.target.scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "start",
       });
     }, 100);
   };
@@ -28,7 +28,7 @@ const InputInformation = () => {
     <div
       id="form-container"
       className={`flex flex-col items-center justify-center overflow-y-auto h-screen transition-all duration-300 ${
-        isVisible ? "pb-60" : "pb-0"
+        isVisible ? "py-60" : "pb-0"
       }`}
     >
       <div className="w-full">
@@ -40,19 +40,25 @@ const InputInformation = () => {
             <SubHeader text="Step 4: Help us identify and process your request faster" />
           </div>
 
-           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div className="col-span-2">
               <label className="block font-semibold mb-1">
-              ID number <span className="text-red-500">*</span>
+                ID number <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 name="studentLrn"
                 value={formData.studentLrn}
-                onChange={handleChange}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, "").slice(0, 20);
+                  handleChange({ target: { name: "studentLrn", value } });
+                }}
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="LRN | Student number"
+                maxLength={20}
                 required
               />
             </div>
@@ -76,7 +82,7 @@ const InputInformation = () => {
           <div className="flex gap-2 mb-4">
             <div>
               <label className="block font-semibold mb-1">
-              First Name <span className="text-red-500">*</span>
+                First Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -85,13 +91,13 @@ const InputInformation = () => {
                 onChange={handleChange}
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="first name"
+                placeholder="First name"
                 required
               />
             </div>
             <div>
               <label className="block font-semibold mb-1">
-              Last Name <span className="text-red-500">*</span>
+                Last Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -100,15 +106,13 @@ const InputInformation = () => {
                 onChange={handleChange}
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="last name"
+                placeholder="Last name"
                 required
               />
             </div>
 
             <div>
-              <label className="block font-semibold mb-1">
-              Middle Name 
-              </label>
+              <label className="block font-semibold mb-1">Middle Name</label>
               <input
                 type="text"
                 name="middleName"
@@ -116,11 +120,10 @@ const InputInformation = () => {
                 onChange={handleChange}
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="middle name(if applicable)"
+                placeholder="Middle name (if applicable)"
                 required
               />
             </div>
-
           </div>
 
           {/* Grade / Section / School Year */}
@@ -157,7 +160,7 @@ const InputInformation = () => {
                 onChange={handleChange}
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="section"
+                placeholder="Section"
               />
             </div>
 
@@ -178,7 +181,7 @@ const InputInformation = () => {
                 }}
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="e.g. 0000 - 0000"
+                placeholder="School Year 0000 - 0000"
                 required
               />
             </div>
@@ -207,7 +210,11 @@ const InputInformation = () => {
 
             <button
               type="submit"
-              className="bg-blue-600 text-white rounded-md px-4 py-4 text-xl w-[50%] hover:bg-blue-700 active:scale-95 transition-transform"
+               className="w-full sm:w-[45%] h-12 mt-2 sm:mt-0 
+                          bg-gradient-to-r from-blue-500 to-green-500 
+                          hover:from-blue-600 hover:to-green-600 
+                          text-white text-lg font-semibold rounded-lg 
+                          shadow-md hover:shadow-lg active:scale-95 transition-all"
               onClick={hideKeyboard}
             >
               Submit
