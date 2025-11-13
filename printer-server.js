@@ -72,15 +72,13 @@ app.get("/ping", (req, res) => res.json({ ok: true }));
 app.post("/pickUpPrint", async (req, res) => {
   try {
     // Accept a simple pickup payload. Required: personalId, officeName, transactionDetails, transactionCode, queueNumber
-    const {
-      officeName,
-      transactionDetails,
-      transactionCode,
-      queueNumber,
-    } = req.body;
+    const { officeName, transactionDetails, transactionCode, queueNumber } =
+      req.body;
 
     if (!transactionDetails || !transactionCode || !queueNumber) {
-      return res.status(400).json({ success: false, message: "Missing fields" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing fields" });
     }
 
     // Build a pickup ticket similar to /print but tailored for pickup
@@ -93,7 +91,7 @@ app.post("/pickUpPrint", async (req, res) => {
 
     const infoLines = `Please proceed to the: ${officeName || ""}\n\n`;
 
-    const txLines = `Documents:\n ${transactionDetails.join('\n')}\n`;
+    const txLines = `Documents:\n ${transactionDetails.join("\n")}\n`;
 
     const footer =
       `--------------------------------\n` +
@@ -164,7 +162,7 @@ app.post("/print", async (req, res) => {
     let txLines = "";
     for (let i = 0; i < transactionArray.length; i++) {
       const t = transactionArray[i];
-      txLines += `${i + 1}. ${t.transactionDetails || ""}\n`;
+      txLines += `${i + 1}. ${t.transactionDetails || ""} x${t.copies}\n`;
       if (t.fee && t.fee > 0) {
         const totalFee = t.fee * t.copies;
         txLines += `  Fee: Php ${totalFee.toFixed(2)}\n`; // Added .toFixed(2) for currency formatting
