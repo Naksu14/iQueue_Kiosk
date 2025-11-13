@@ -58,7 +58,7 @@ const InputInformation = () => {
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="LRN | Student number"
-                maxLength={20}
+                maxLength={12}
                 required
               />
             </div>
@@ -121,7 +121,6 @@ const InputInformation = () => {
                 onFocus={handleFocus}
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="Middle name (if applicable)"
-                required
               />
             </div>
           </div>

@@ -59,7 +59,7 @@ export const useQueueTicket = () => {
           const office = await getOfficeById(t.office.office_id);
           console.log(`${office.office_name}`);
           console.log(`   ${t.transactionDetails}`);
-          if (t.fee) console.log(`   Fee: Php ${t.fee}`);
+          if (t.fee) console.log(`   Fee: Php ${t.fee * t.copies}`);
           console.log(""); // spacing between transactions
         }
       }
@@ -77,19 +77,19 @@ export const useQueueTicket = () => {
       };
 
       //  Call printer server (configurable via REACT_APP_PRINTER_SERVER) ============================================== actual print call
-      const response = await fetch(`${PRINTER_SERVER}/print`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      // const response = await fetch(`${PRINTER_SERVER}/print`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(payload),
+      // });
 
-      if (!response.ok) {
-        // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
-        const text = await response.text();
-        console.error("Print server responded with error:", text);
-        setPrintStatus("error");
-        throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
-      }
+      // if (!response.ok) {
+      //   // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
+      //   const text = await response.text();
+      //   console.error("Print server responded with error:", text);
+      //   setPrintStatus("error");
+      //   throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
+      // }
 
       // Simulate ticket printing delay
       setTimeout(() => {

@@ -34,8 +34,8 @@ const QueueTicketPage = () => {
             className="font-bold uppercase"
           />
         </div>
-        <p className="text-gray-600 text-sm">
-          Present your ticket in transaction office
+        <p className="text-gray-600 text-sm w-[500px] mx-auto">
+          Present your ticket in transaction office, Your number is delayed by 2 minutes to allow time for you to arrive at the transaction office.
         </p>
       </header>
 

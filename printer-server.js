@@ -91,9 +91,9 @@ app.post("/pickUpPrint", async (req, res) => {
       `--------- iQueue Ticket --------\n` +
       `Date:${new Date().toLocaleDateString()} Time:${new Date().toLocaleTimeString()}\n`;
 
-    const infoLines = `Office: ${officeName || ""}\n\n`;
+    const infoLines = `Please proceed to the: ${officeName || ""}\n\n`;
 
-    const txLines = `Documents:\n ${transactionDetails}\n`;
+    const txLines = `Documents:\n ${transactionDetails.join('\n')}\n`;
 
     const footer =
       `--------------------------------\n` +
@@ -165,7 +165,10 @@ app.post("/print", async (req, res) => {
     for (let i = 0; i < transactionArray.length; i++) {
       const t = transactionArray[i];
       txLines += `${i + 1}. ${t.transactionDetails || ""}\n`;
-      if (t.fee) txLines += `   Fee: Php ${t.fee}\n`;
+      if (t.fee && t.fee > 0) {
+        const totalFee = t.fee * t.copies;
+        txLines += `  Fee: Php ${totalFee.toFixed(2)}\n`; // Added .toFixed(2) for currency formatting
+      }
     }
 
     const footer =

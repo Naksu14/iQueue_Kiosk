@@ -38,7 +38,6 @@ export const TransactionProvider = ({ children }) => {
         {
           stepNumber: 1,
           stepName: "pending",
-          instruction: "Wait",
           auditBy: null,
         },
       ],
@@ -72,11 +71,18 @@ export const TransactionProvider = ({ children }) => {
 
   //  Update copies
   const updateCopies = (index, newCopies) => {
-    setTransactions((prev) =>
-      prev.map((t, i) =>
+    setTransactions((prev) => {
+      const updated = prev.map((t, i) =>
         i === index ? { ...t, copies: Math.max(newCopies, 1) } : t
-      )
-    );
+      );
+      // Persist immediately to localStorage so copies are always up-to-date
+      try {
+        localStorage.setItem("transactions", JSON.stringify(updated));
+      } catch (e) {
+        console.warn("Failed to persist transactions to localStorage:", e);
+      }
+      return updated;
+    });
   };
 
   //  Export as JSON

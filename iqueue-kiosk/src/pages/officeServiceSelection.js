@@ -41,6 +41,7 @@ const OfficeServiceSelection = () => {
     );
   }
 
+
   return (
     <div className="flex flex-col items-center justify-center">
       <SubHeader text="Step 2: Please select your destination offices and requests." />
@@ -181,7 +182,15 @@ const OfficeServiceSelection = () => {
 
       {/* Footer Button */}
       <div className="flex">
-        <BackButton onClick={() => setShowCancelModal(true)} />
+        <BackButton onClick={() => {
+          if (transactions.length > 0) {
+            setShowCancelModal(true);
+          } else {
+            // No transactions, just go back
+            window.history.back();
+          }
+
+        }} />
         <TransactionButton disabled={isDisabled} onClick={handleNext} />
       </div>
 
