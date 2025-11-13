@@ -11,7 +11,8 @@ export const useQueueTicket = () => {
   // Printer server base URL can be configured at build time via
   // REACT_APP_PRINTER_SERVER (e.g. http://192.168.1.10:4000). ito yung network ip ng raspberry pi
   // Falls back to localhost for development on the same machine.
-  const PRINTER_SERVER = process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
+  const PRINTER_SERVER =
+    process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
 
   const handlePrint = async () => {
     if (!transactions || transactions.length === 0) {
@@ -77,19 +78,19 @@ export const useQueueTicket = () => {
       };
 
       //  Call printer server (configurable via REACT_APP_PRINTER_SERVER) ============================================== actual print call
-      // const response = await fetch(`${PRINTER_SERVER}/print`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(payload),
-      // });
+      const response = await fetch(`${PRINTER_SERVER}/print`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      // if (!response.ok) {
-      //   // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
-      //   const text = await response.text();
-      //   console.error("Print server responded with error:", text);
-      //   setPrintStatus("error");
-      //   throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
-      // }
+      if (!response.ok) {
+        // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
+        const text = await response.text();
+        console.error("Print server responded with error:", text);
+        setPrintStatus("error");
+        throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
+      }
 
       // Simulate ticket printing delay
       setTimeout(() => {
@@ -119,7 +120,7 @@ export const useQueueTicket = () => {
             } catch (error) {
               console.error(" Failed to update queue status:", error);
             }
-          }, 30000);  // 30 seconds delay
+          }, 30000); // 30 seconds delay
         }, 5000); // Wait before navigating home
       }, 3000); // Simulated delay for printing
     } catch (err) {
