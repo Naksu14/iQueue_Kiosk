@@ -44,8 +44,8 @@ const WelcomePage = () => {
           <IconContainer className="p-4 bg-blue-100 text-blue-600 rounded-full mb-2">
             <FaQrcode size={26} />
           </IconContainer>
-          <h2 className="font-semibold text-base mb-1">Online Appointment</h2>
-          <p className="text-gray-500 text-xs">Go to QR Scanner</p>
+          <h2 className="font-semibold text-base mb-1">Online Request</h2>
+          <p className="text-gray-500 text-xs">Use Kiosk's QR Scanner</p>
         </Button>
       </div>
       <HelpButton />
