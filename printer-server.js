@@ -91,7 +91,17 @@ app.post("/pickUpPrint", async (req, res) => {
 
     const infoLines = `Please proceed to the: ${officeName || ""}\n\n`;
 
-    const txLines = `Documents:\n ${transactionDetails.join("\n")}\n`;
+    // Normalize transactionDetails to an array so clients may send either an
+    // array of strings or a single string (joined by newlines or semicolons).
+    let txArray = [];
+    if (Array.isArray(transactionDetails)) txArray = transactionDetails;
+    else if (typeof transactionDetails === 'string') {
+      txArray = transactionDetails
+        .split(/\r?\n|\s*;\s*/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+    const txLines = `Documents:\n ${txArray.join("\n")}\n`;
 
     const footer =
       `--------------------------------\n` +
