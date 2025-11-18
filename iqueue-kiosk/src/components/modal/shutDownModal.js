@@ -1,14 +1,34 @@
 import React, { useState } from "react";
-
+import { useKeyboard } from "../../context/KeyboardContext";
+import { useRef, useEffect } from "react";
 export default function ShutdownModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState("password"); // "password" or "select"
   const [password, setPassword] = useState("");
+  const { showKeyboard, isVisible, hideKeyboard } = useKeyboard();
 
+  // Helper to focus and scroll input into view
+  const passwordRef = useRef(null);
+  const handleChange = (e) => setPassword(e.target.value);
+  const handleFocus = (e) => {
+    showKeyboard(e.target, handleChange);
+
+    // Scroll smoothly so the input stays visible above keyboard
+    setTimeout(() => {
+      e.target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+  };
   const openModal = () => {
     setIsOpen(true);
     setStep("password"); // reset step every time you open
     setPassword("");
+    // focus the password input shortly after opening so the keyboard can attach
+    setTimeout(() => {
+      passwordRef.current?.focus();
+    }, 50);
   };
 
   const closeModal = () => {
@@ -20,22 +40,60 @@ export default function ShutdownModal() {
       alert("Please enter a password");
       return;
     }
-    setStep("select");
+
+    // Validate password with the kiosk-control server before showing actions
+    (async () => {
+      try {
+        // Trim whitespace and build server URL relative to current host so it works
+        // when the frontend is served from the Pi's IP instead of localhost.
+        const trimmed = (password || "").trim();
+        const host = window?.location?.hostname || 'localhost';
+        const base = `http://${host}:3001`;
+
+        const res = await fetch(`${base}/kiosk-validate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: trimmed }),
+        });
+        if (!res.ok) {
+          // invalid password or server error — close modal as requested
+          const body = await res.json().catch(() => ({}));
+          alert(body.message || 'Invalid password');
+          closeModal();
+          return;
+        }
+        // password valid — store trimmed password and proceed to selection step
+        setPassword(trimmed);
+        setStep("select");
+        // hide keyboard when moving to select step
+        hideKeyboard();
+      } catch (err) {
+        console.error('Validation error', err);
+        alert('Failed to validate password');
+        hideKeyboard();
+        closeModal();
+      }
+    })();
   };
 
   const handleAction = async (action) => {
     try {
-      const res = await fetch("http://localhost:3001/kiosk-control", {
+      const host = window?.location?.hostname || 'localhost';
+      const base = `http://${host}:3001`;
+
+      const res = await fetch(`${base}/kiosk-control`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password, action: action.toLowerCase() }),
       });
       const data = await res.json();
       alert(data.message);
+      hideKeyboard();
       closeModal();
     } catch (err) {
       alert("Failed to execute command");
       console.error(err);
+      hideKeyboard();
       closeModal();
     }
   };
@@ -43,6 +101,11 @@ export default function ShutdownModal() {
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) closeModal();
   };
+
+  useEffect(() => {
+    // if modal closes, ensure keyboard is hidden
+    if (!isOpen) hideKeyboard();
+  }, [isOpen]);
 
   return (
     <div>
@@ -57,10 +120,13 @@ export default function ShutdownModal() {
       {/* Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40`}
+          style={{ paddingBottom: isVisible ? 240 : 0 }}
           onClick={handleBackdropClick}
         >
-          <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-md max-h-[90%] overflow-y-auto px-6 py-5 relative">
+          <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-md overflow-y-auto px-6 py-5 relative"
+            style={{ maxHeight: isVisible ? '' : '90vh' }}
+          >
             {/* Close button */}
             <button
               onClick={closeModal}
@@ -72,19 +138,23 @@ export default function ShutdownModal() {
 
             {/* Header */}
             <div className="flex flex-col items-center mb-4">
-              <h2 className="text-xl font-bold text-center">iQueue Control</h2>
-              <p className="text-gray-500 text-sm text-center mt-1">
-                Enter your password to access
-              </p>
+              <h2 className="text-xl font-bold text-center">Authorize Access to Kiosk Control</h2>
+              
             </div>
 
             {/* Body */}
             {step === "password" && (
               <div className="flex flex-col gap-4">
+                <p className="text-gray-500 text-sm text-center mt-1">
+                  Enter password to access
+                </p>
                 <input
                   type="password"
+                  name="password"
+                  ref={passwordRef}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handleChange}
+                  onFocus={(e) => handleFocus(e)}
                   className="border rounded px-3 py-2 w-full"
                   placeholder="Password"
                 />
@@ -99,7 +169,6 @@ export default function ShutdownModal() {
 
             {step === "select" && (
               <div className="flex flex-col gap-4">
-                <p className="text-gray-700 text-center mb-2">Select an action:</p>
                 <button
                   onClick={() => handleAction("Shutdown")}
                   className="bg-red-500 hover:bg-red-600 text-white rounded py-2"

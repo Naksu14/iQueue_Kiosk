@@ -1,0 +1,20 @@
+[Unit]
+Description=iQueue kiosk-control server
+After=network.target
+
+[Service]
+# Run as the unprivileged kiosk user 'iqueue'. This unit assumes you will
+# also install the sudoers snippet that allows the 'iqueue' user to run
+# /sbin/shutdown and /sbin/reboot without a password.
+User=iqueue
+WorkingDirectory=/home/iqueue/iQueue_Kiosk
+Environment=ALLOW_SHUTDOWN=1
+Environment=PORT=3001
+ExecStart=/usr/bin/node /home/iqueue/iQueue_Kiosk/kiosk-control-server.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

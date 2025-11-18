@@ -1,0 +1,5 @@
+## sudoers snippet for iQueue kiosk-control
+# Allows the 'iqueue' user to run only shutdown and reboot without a password.
+# Install by copying to /etc/sudoers.d/ and set mode 0440.
+
+iqueue ALL=(root) NOPASSWD: /sbin/shutdown, /sbin/reboot

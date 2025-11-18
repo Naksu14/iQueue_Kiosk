@@ -554,9 +554,9 @@ const PickRequestPage = () => {
           <div className="flex flex-col items-center p-4 bg-red-50 rounded-lg border border-red-200">
             <FaTimesCircle className="text-5xl text-red-500 mb-3" />
             <span className="text-red-600 font-normal text-sm text-center mb-3">
-              **QR Code not recognized or expired.**
+              **QR Code not recognized or invalid.**
               <br />
-              Please try again or proceed as walk-in.
+              May have been completed. Please try again.
             </span>
             <Button
               className="w-full h-10 font-semibold mt-1 bg-red-500 hover:bg-red-600"
