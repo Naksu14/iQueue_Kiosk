@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMale, FaQrcode } from "react-icons/fa";
+import ShutdownModal from "../components/modal/shutDownModal";
 import Button from "../components/button/button";
 import HelpButton from "../components/button/helpButton";
 import IconContainer from "../components/layout/iconContainer";
@@ -49,6 +50,9 @@ const WelcomePage = () => {
         </Button>
       </div>
       <HelpButton />
+      <div>
+        <ShutdownModal />
+      </div>    
     </div>
   );
 };

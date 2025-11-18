@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMale } from "react-icons/fa";
 import Button from "../components/button/button";
+import BackButton from "../components/button/backButton";
 import HelpButton from "../components/button/helpButton";
 import IconContainer from "../components/layout/iconContainer";
 import Header from "../components/layout/header";
@@ -68,6 +69,7 @@ const WalkinSelectTransaction = () => {
       </div>
 
       <HelpButton />
+      <BackButton onClick={() => navigate(-1)} />
     </div>
   );
 };

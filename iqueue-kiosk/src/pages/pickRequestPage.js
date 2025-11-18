@@ -149,44 +149,44 @@ const PickRequestPage = () => {
     }
   };
 
-  const handleScan = async () => {
-    // ... (This function remains unchanged)
-    if (scanStatus !== "idle") return;
-    setScanStatus("waiting");
+  // const handleScan = async () => {
+  //   // ... (This function remains unchanged)
+  //   if (scanStatus !== "idle") return;
+  //   setScanStatus("waiting");
 
-    try {
-      const transactionData = await getTransactionByCode("demo"); // Replace with actual scanned code
-      const transactions = transactionData.transactions;
+  //   try {
+  //     const transactionData = await getTransactionByCode("demo"); // Replace with actual scanned code
+  //     const transactions = transactionData.transactions;
 
-      if (!transactions || transactions.length === 0) {
-        setScanStatus("error");
-        setTransactionReqDetails(null);
-        return;
-      }
+  //     if (!transactions || transactions.length === 0) {
+  //       setScanStatus("error");
+  //       setTransactionReqDetails(null);
+  //       return;
+  //     }
 
-      // Use the first one only for personal info & office
-      const first = transactions[0];
+  //     // Use the first one only for personal info & office
+  //     const first = transactions[0];
 
-      const detailsObj = {
-        id: first.personalInfo.id,
-        transactionCode: first.personalInfo.transactionCode,
-        fullName:
-          first.personalInfo.fullName ||
-          `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
-        officeId: first.office.office_id,
-        officeName: first.office.office_name,
-        // Get all transaction details
-        transactionDetailsArr: transactions.map((t) => t.transactionDetails),
-      };
+  //     const detailsObj = {
+  //       id: first.personalInfo.id,
+  //       transactionCode: first.personalInfo.transactionCode,
+  //       fullName:
+  //         first.personalInfo.fullName ||
+  //         `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
+  //       officeId: first.office.office_id,
+  //       officeName: first.office.office_name,
+  //       // Get all transaction details
+  //       transactionDetailsArr: transactions.map((t) => t.transactionDetails),
+  //     };
 
-      console.log("✅ Combined transaction details:", detailsObj);
-      setTransactionReqDetails(detailsObj);
-      setScanStatus("success");
-    } catch (error) {
-      console.error("❌ Error during scan:", error);
-      setScanStatus("error");
-    }
-  };
+  //     console.log("✅ Combined transaction details:", detailsObj);
+  //     setTransactionReqDetails(detailsObj);
+  //     setScanStatus("success");
+  //   } catch (error) {
+  //     console.error("❌ Error during scan:", error);
+  //     setScanStatus("error");
+  //   }
+  // };
 
   // Trigger a hardware scan via the Pi scanner server.
   // POST /api/trigger-scan will wait until the next barcode is read and return it.
@@ -304,42 +304,42 @@ const PickRequestPage = () => {
     }
   }, [captureMode]);
 
-  const handleScannedCode = async (raw) => {
-    const scannedCode = parseScannedCode(raw);
-    if (!scannedCode) {
-      setScanStatus("error");
-      return;
-    }
-    try {
-      const transactionData = await getTransactionByCode(scannedCode);
-      const transactions = transactionData.transactions;
-      if (!transactions || transactions.length === 0) {
-        console.warn("No transactions found for scanned code:", scannedCode);
-        setScanStatus("error");
-        setCaptureMode(false);
-        return;
-      }
+  // const handleScannedCode = async (raw) => {
+  //   const scannedCode = parseScannedCode(raw);
+  //   if (!scannedCode) {
+  //     setScanStatus("error");
+  //     return;
+  //   }
+  //   try {
+  //     const transactionData = await getTransactionByCode(scannedCode);
+  //     const transactions = transactionData.transactions;
+  //     if (!transactions || transactions.length === 0) {
+  //       console.warn("No transactions found for scanned code:", scannedCode);
+  //       setScanStatus("error");
+  //       setCaptureMode(false);
+  //       return;
+  //     }
 
-      const first = transactions[0];
-      const detailsObj = {
-        id: first.personalInfo.id,
-        transactionCode: first.personalInfo.transactionCode,
-        fullName:
-          first.personalInfo.fullName ||
-          `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
-        officeId: first.office.office_id,
-        officeName: first.office.office_name,
-        transactionDetailsArr: transactions.map((t) => t.transactionDetails),
-      };
-      setTransactionReqDetails(detailsObj);
-      setScanStatus("success");
-      setCaptureMode(false);
-    } catch (err) {
-      console.error("Error processing scanned code:", err);
-      setScanStatus("error");
-      setCaptureMode(false);
-    }
-  };
+  //     const first = transactions[0];
+  //     const detailsObj = {
+  //       id: first.personalInfo.id,
+  //       transactionCode: first.personalInfo.transactionCode,
+  //       fullName:
+  //         first.personalInfo.fullName ||
+  //         `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
+  //       officeId: first.office.office_id,
+  //       officeName: first.office.office_name,
+  //       transactionDetailsArr: transactions.map((t) => t.transactionDetails),
+  //     };
+  //     setTransactionReqDetails(detailsObj);
+  //     setScanStatus("success");
+  //     setCaptureMode(false);
+  //   } catch (err) {
+  //     console.error("Error processing scanned code:", err);
+  //     setScanStatus("error");
+  //     setCaptureMode(false);
+  //   }
+  // };
 
   const handleManualCodeSubmit = async () => {
     if (!code) return;
@@ -674,7 +674,7 @@ const PickRequestPage = () => {
 
       {scanStatus !== "waiting" && scanStatus !== "success" && (
         <div className="mt-8">
-          <BackButton onClick={() => navigate("/")} />
+          <BackButton onClick={() => navigate(-1)} />
         </div>
       )}
     </div>
