@@ -98,6 +98,9 @@ export const usePickupHooks = () => {
       localStorage.setItem("queueNumber", queueNumberId.queueNumber);
     } catch (error) {
       console.error(" Error creating queue number:", error);
+      // allow future prints and abort if we couldn't create a queue number
+      setIsPrinting(false);
+      return;
     }
 
     const queueNumber = localStorage.getItem("queueNumber");
@@ -122,35 +125,42 @@ export const usePickupHooks = () => {
     if (!response.ok) {
       const text = await response.text();
       console.error("Print server responded with error:", text);
-      throw new Error("Printing failed");
-    }
-    try {
-      setTimeout(() => {
-        setTimeout(() => {
-          const queueNumberId = localStorage.getItem("queueNumberId");
-
-          navigate("/");
-
-          setTimeout(async () => {
-            if (!queueNumberId) {
-              console.warn(" No valid queue ID found for status update!");
-              return;
-            }
-            try {
-              await updateQueueNoStatus(queueNumberId, "waiting");
-              console.log(" Queue status updated successfully!");
-            } catch (error) {
-              console.error(" Failed to update queue status:", error);
-            }
-          }, 30000); // 30 seconds delay
-        }, 5000); // Wait before navigating home
-      }, 3000); // Simulated delay for printing
-    } catch (error) {
-      console.error("Error creating queue number:", error);
-      setScanStatus("error");
-    } finally {
       // allow future prints
       setIsPrinting(false);
+      throw new Error("Printing failed");
+    }
+    // Keep isPrinting=true until we navigate away (prevents duplicate clicks/spam).
+    // We await the simulated delays so the UI can't trigger another print immediately.
+    try {
+      // wait simulated print delay
+      await new Promise((res) => setTimeout(res, 1003));
+
+      const queueNumberId = localStorage.getItem("queueNumberId");
+
+      // additional delay before navigation
+      await new Promise((res) => setTimeout(res, 3000));
+
+      navigate("/");
+
+      // schedule background status update after 30s (do not block user)
+      setTimeout(async () => {
+        if (!queueNumberId) {
+          console.warn(" No valid queue ID found for status update!");
+          return;
+        }
+        try {
+          await updateQueueNoStatus(queueNumberId, "waiting");
+          console.log(" Queue status updated successfully!");
+        } catch (error) {
+          console.error(" Failed to update queue status:", error);
+        }
+      }, 30000);
+    } catch (error) {
+      console.error("Error during post-print flow:", error);
+      setScanStatus("error");
+    } finally {
+      // small cooldown to prevent accidental re-clicks after navigation
+      setTimeout(() => setIsPrinting(false), 1000);
     }
   };
 
@@ -437,6 +447,7 @@ export const usePickupHooks = () => {
     transactionReqDetails,
     triggerScan,
     handlePickupPrint,
+    isPrinting,
     code,
     setCode,
     isValidTransactionCode,

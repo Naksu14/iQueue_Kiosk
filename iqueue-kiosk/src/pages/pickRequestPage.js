@@ -17,6 +17,7 @@ const PickRequestPage = () => {
     transactionReqDetails,
     triggerScan,
     handlePickupPrint,
+    isPrinting,
     code,
     setCode,
     isValidTransactionCode,
@@ -119,9 +120,9 @@ const PickRequestPage = () => {
           <Button
             className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow hover:shadow-md hover:opacity-90 transition duration-200 flex items-center justify-center gap-2"
             onClick={handlePickupPrint}
-            disabled={scanStatus === "waiting"}
+            disabled={isPrinting}
           >
-            {scanStatus === "waiting" ? (
+            {isPrinting ? (
               <>
                 <ImSpinner2 className="animate-spin text-2xl text-white" />
                 <span>Printing...</span>
