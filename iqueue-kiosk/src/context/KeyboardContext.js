@@ -26,6 +26,11 @@ export const KeyboardProvider = ({ children }) => {
     const inputType = inputEl.type;
     const inputName = inputEl.name;
 
+    const capitalizeFirstLetter = (str) => {
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    };
+
     // Handle "Enter" key: just close the keyboard
     if (key === "Enter") {
       hideKeyboard();
@@ -71,7 +76,11 @@ export const KeyboardProvider = ({ children }) => {
         value = value.slice(0, 4) + " - " + value.slice(4);
       }
       cursorPos = value.length;
-    } else if (inputName === "fullName") {
+    } else if (
+      inputName === "firstName" ||
+      inputName === "lastName" ||
+      inputName === "middleName"
+    ) {
       if (key === "Clear") {
         value = "";
       } else if (key === "Backspace") {
@@ -81,7 +90,8 @@ export const KeyboardProvider = ({ children }) => {
         }
       } else if (!/[0-9]/.test(key)) {
         value = value + key;
-        cursorPos += key.length;
+        value = capitalizeFirstLetter(value); // <-- capitalize first letter
+        cursorPos = value.length;
       } else {
         return; // Ignore digits for name
       }
@@ -114,7 +124,7 @@ export const KeyboardProvider = ({ children }) => {
 
     if (changeHandler) {
       changeHandler({
-        target: { name: inputName, value }
+        target: { name: inputName, value },
       });
     }
 
