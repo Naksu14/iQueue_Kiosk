@@ -21,6 +21,7 @@ export const useInputInfo = () => {
     transactionCode: "",
     verifiedBy: null,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -55,6 +56,14 @@ export const useInputInfo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevent double-submit while a previous submission is in progress
+    if (isSubmitting) {
+      console.warn("Submit ignored: already submitting.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
       // Step 1: Generate transaction code
       const transactionCode = generateTransactionCode();
@@ -74,16 +83,39 @@ export const useInputInfo = () => {
       const transactions = JSON.parse(
         localStorage.getItem("transactions") || "[]"
       );
+      console.log(
+        "✅ Transactions retrieved for queue creation.",
+        transactions
+      );
+
+      // Collect unique office names from transactions (filter out falsy)
       const uniqueOfficeNames = [
-        ...new Set(transactions.map((t) => t.officeName || "General")),
+        ...new Set(transactions.map((t) => t.officeName).filter(Boolean)),
       ];
 
-      // Main office for the 'office' field (first office)
-      const mainOffice =
-        uniqueOfficeNames.length > 1 ? "Multiple" : uniqueOfficeNames[0];
+      // If all transactions are inquiries, route them to their specific office(s).
+      // If any transaction is NOT an Inquiry (e.g., Payment), the primary office
+      // should be Accounting so the user can pay; include Accounting in involved.
+      const allInquiry =
+        transactions.length > 0 &&
+        transactions.every((t) => t.transactionType === "Inquiry");
 
-      // officeInvolved should always be an array
-      const officeInvolved = uniqueOfficeNames;
+      let officeInvolved = [...uniqueOfficeNames];
+      let mainOffice;
+
+      if (allInquiry) {
+        // All are inquiries — keep their specific office(s)
+        mainOffice = officeInvolved.length > 1 ? "Multiple" : officeInvolved[0];
+      } else {
+        // At least one requires payment or other processing — route to Accounting
+        const accountingName = "Accounting Office";
+        // Rebuild officeInvolved so Accounting is always first, followed by
+        // the other unique offices (excluding Accounting) in their original order.
+        const others = uniqueOfficeNames.filter((n) => n !== accountingName);
+        officeInvolved = [accountingName, ...others];
+        officeInvolved = Array.from(new Set(officeInvolved));
+        mainOffice = accountingName;
+      }
 
       // Step 5: Create queue number in backend
       const queuePayload = {
@@ -92,6 +124,7 @@ export const useInputInfo = () => {
         queueType: "Walk-in",
         personalInfoId,
       };
+      console.log("✅ Queue payload prepared.", queuePayload);
 
       //console.log("Queue Payload:", queuePayload);
 
@@ -111,6 +144,9 @@ export const useInputInfo = () => {
     } catch (error) {
       console.error(" Failed to save info:", error);
       alert("Failed to save user information. Please try again.");
+    } finally {
+      // Allow resubmission after the whole flow completes (success or error)
+      setIsSubmitting(false);
     }
   };
 
@@ -119,5 +155,6 @@ export const useInputInfo = () => {
     setFormData,
     handleChange,
     handleSubmit,
+    isSubmitting,
   };
 };
