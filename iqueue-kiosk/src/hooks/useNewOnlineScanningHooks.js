@@ -351,19 +351,47 @@ export const useNewOnlineScanningHooks = () => {
     // ... (This effect remains unchanged)
     if (scanStatus === "success" && transactionReqDetails) {
       const fetchQueueMetrics = async () => {
-        const countWaiting = await getCountWaiting(
-          transactionReqDetails.officeName
-        );
-        const avgServiceTime = await getAverageServiceTime(
-          transactionReqDetails.officeId
-        );
-        const estimatedWait = countWaiting * avgServiceTime;
+        try {
+          // Decide which office we should get metrics for.
+          // If all transactions are Inquiry -> use the transaction's office.
+          // Otherwise the queue will go to Accounting, so use Accounting for wait count.
+          const txObjects = transactionReqDetails.transactionObjects || [];
+          const allInquiry =
+            txObjects.length > 0 &&
+            txObjects.every((t) => t.transactionType === "Inquiry");
 
-        setTransactionReqDetails((prev) => ({
-          ...prev,
-          countWaiting,
-          estimatedWait,
-        }));
+          const accountingName = "Accounting Office";
+          const metricsOfficeName = allInquiry
+            ? transactionReqDetails.officeName
+            : accountingName;
+
+          const countWaiting = await getCountWaiting(metricsOfficeName);
+
+          // Try to resolve an officeId appropriate for the selected metrics office.
+          let metricsOfficeId = null;
+          if (allInquiry) {
+            metricsOfficeId = transactionReqDetails.officeId;
+          } else {
+            // try to find an accounting office id from transaction objects
+            const acctTx = txObjects.find(
+              (t) => t.office && t.office.office_name === accountingName
+            );
+            metricsOfficeId = acctTx
+              ? acctTx.office.office_id
+              : transactionReqDetails.officeId;
+          }
+
+          const avgServiceTime = await getAverageServiceTime(metricsOfficeId);
+          const estimatedWait = countWaiting * (avgServiceTime || 0);
+
+          setTransactionReqDetails((prev) => ({
+            ...prev,
+            countWaiting,
+            estimatedWait,
+          }));
+        } catch (err) {
+          console.error("Failed to fetch queue metrics:", err);
+        }
       };
       fetchQueueMetrics();
     }
