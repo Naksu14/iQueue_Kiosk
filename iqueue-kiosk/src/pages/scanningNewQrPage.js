@@ -5,10 +5,10 @@ import Button from "../components/button/button";
 import IconContainer from "../components/layout/iconContainer";
 import SubHeader from "../components/layout/subheader";
 import BackButton from "../components/button/backButton";
-import {useOnlineScanningHooks} from "../hooks/useOnlineScanningHooks";
+import {useNewOnlineScanningHooks} from "../hooks/useNewOnlineScanningHooks";
 import { useKeyboard } from "../context/KeyboardContext";
 
-const ScanningPage = () => {
+const ScanningNewQrPage = () => {
   const { showKeyboard, isVisible, hideKeyboard } = useKeyboard();
   const {
     navigate,
@@ -25,7 +25,7 @@ const ScanningPage = () => {
     handleTryAgain,
     showInput,
     setShowInput,
-  } = useOnlineScanningHooks();
+  } = useNewOnlineScanningHooks();
 
   // --- SUCCESS STATE ---
   if (scanStatus === "success" && transactionReqDetails) {
@@ -41,7 +41,7 @@ const ScanningPage = () => {
         <div className="flex-1 p-6 bg-white shadow-md rounded-lg text-left border border-gray-100 transition-all duration-200 hover:shadow-lg">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xl font-semibold text-gray-800">
-              Transaction
+              Pick-up Details
             </h2>
             <span className="text-sm text-gray-500">
               {new Date().toLocaleDateString()}
@@ -62,7 +62,7 @@ const ScanningPage = () => {
               </li>
               <li className="flex flex-col">
                 <span className="font-medium text-gray-800">
-                  Transaction/Request Details:
+                  Pick Up Document:
                 </span>
                 <span className="text-gray-600">
                   {item.transactionDetailsArr &&
@@ -140,11 +140,11 @@ const ScanningPage = () => {
     <div className="flex flex-col items-center justify-center p-4">
       <header className="mb-6 text-center">
         <SubHeader
-          text="Scan QR for Transaction Pick-up"
+          text="Scan QR for New/Payment Transaction"
           className="font-bold"
         />
-        <p className="text-gray-700 text-md mt-1">
-          Present your QR code to claim your ready request or document.
+        <p className="text-gray-700 text-md  mt-1">
+          Present your QR code to proceed with a New Service Request or Payment. 
         </p>
       </header>
 
@@ -281,4 +281,4 @@ const ScanningPage = () => {
   );
 };
 
-export default ScanningPage;
+export default ScanningNewQrPage;

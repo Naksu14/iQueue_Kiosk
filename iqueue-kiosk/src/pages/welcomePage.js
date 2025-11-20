@@ -21,7 +21,7 @@ const WelcomePage = () => {
       </header>
 
       {/* Step Label */}
-      <SubHeader text="Step 1: Please select an option to start your transaction." />
+      <SubHeader text="Please select an option to start your transaction." />
 
       {/* Card Grid */}
       <div className="grid grid-cols-2 gap-6 mt-3">
@@ -30,7 +30,7 @@ const WelcomePage = () => {
           onClick={() => navigate("/WalkinSelectTransaction")}
           className="w-64 h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
-          <IconContainer className="p-4 bg-green-100 text-green-600 rounded-full mb-2">
+          <IconContainer className=" bg-green-600 text-green-600 rounded-full mb-2">
             <FaMale size={26} />
           </IconContainer>
           <h2 className="font-semibold text-base mb-1">Walk-in Request</h2>
@@ -39,10 +39,10 @@ const WelcomePage = () => {
 
         {/* Online Appointment */}
         <Button
-          onClick={() => navigate("/ScanningPage")}
+          onClick={() => navigate("/OnlineSelectTransaction")}
           className="w-64 h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
-          <IconContainer className="p-4 bg-blue-100 text-blue-600 rounded-full mb-2">
+          <IconContainer className=" p-3 bg-yellow-500 text-blue-600 rounded-full mb-2">
             <FaQrcode size={26} />
           </IconContainer>
           <h2 className="font-semibold text-base mb-1">Online Request</h2>
@@ -52,7 +52,7 @@ const WelcomePage = () => {
       <HelpButton />
       <div>
         <ShutdownModal />
-      </div>    
+      </div>
     </div>
   );
 };

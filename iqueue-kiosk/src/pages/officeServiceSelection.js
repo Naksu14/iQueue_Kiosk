@@ -41,7 +41,6 @@ const OfficeServiceSelection = () => {
     );
   }
 
-
   return (
     <div className="flex flex-col items-center justify-center">
       <SubHeader text="Step 2: Please select your destination offices and requests." />
@@ -148,7 +147,7 @@ const OfficeServiceSelection = () => {
                               <div className="text-xs">Selected</div>
                             ) : (
                               <button
-                                className="bg-gray-200 w-15 h-8 text-xs px-2 py-1 rounded-md disabled:opacity-50"
+                                className="bg-gray-500 w-15 h-8 text-white text-xs px-2 py-1 rounded-md disabled:opacity-50"
                                 disabled={alreadyAdded}
                                 onClick={() =>
                                   handleRequestSelect(
@@ -182,15 +181,16 @@ const OfficeServiceSelection = () => {
 
       {/* Footer Button */}
       <div className="flex">
-        <BackButton onClick={() => {
-          if (transactions.length > 0) {
-            setShowCancelModal(true);
-          } else {
-            // No transactions, just go back
-            window.history.back();
-          }
-
-        }} />
+        <BackButton
+          onClick={() => {
+            if (transactions.length > 0) {
+              setShowCancelModal(true);
+            } else {
+              // No transactions, just go back
+              window.history.back();
+            }
+          }}
+        />
         <TransactionButton disabled={isDisabled} onClick={handleNext} />
       </div>
 

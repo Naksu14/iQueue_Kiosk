@@ -8,17 +8,14 @@ import {
   getAverageServiceTime,
 } from "../services/dbServices/addQueueNumber";
 
-export const usePickupHooks = () => {
+export const useOnlineScanningHooks = () => {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
 
   const [code, setCode] = useState("");
   const [scanStatus, setScanStatus] = useState("idle");
   const [transactionReqDetails, setTransactionReqDetails] = useState(null);
-  const [isPrinting, setIsPrinting] = useState(false);
-
-  const PRINTER_SERVER =
-    process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
+  const [isDisplaying, setIsDisplaying] = useState(false);
 
   // Scanner server (node process on the Pi that reads the USB scanner stdin)
   const SCANNER_SERVER =
@@ -73,23 +70,23 @@ export const usePickupHooks = () => {
     return s;
   };
 
-  const handlePickupPrint = async () => {
+  const handleDisplayQueueInMobile = async () => {
     // Prevent duplicate printing while a print is already in progress
-    if (isPrinting) {
+    if (isDisplaying) {
       console.warn("Print ignored: already printing.");
       return;
     }
-    setIsPrinting(true);
+    setIsDisplaying(true);
 
     if (!transactionReqDetails) {
-      setIsPrinting(false);
+      setIsDisplaying(false);
       return;
     }
     const queuePayload = {
       office: transactionReqDetails.officeName,
       officeInvolved: [transactionReqDetails.officeName],
       personalInfoId: transactionReqDetails.id,
-      queueType: "Walk-in",
+      queueType: "Online",
       pickUp: true,
     };
     try {
@@ -99,38 +96,10 @@ export const usePickupHooks = () => {
     } catch (error) {
       console.error(" Error creating queue number:", error);
       // allow future prints and abort if we couldn't create a queue number
-      setIsPrinting(false);
+      setIsDisplaying(false);
       return;
     }
 
-    const queueNumber = localStorage.getItem("queueNumber");
-
-    const printPayload = {
-      officeName: transactionReqDetails.officeName,
-      transactionDetails: Array.isArray(
-        transactionReqDetails.transactionDetailsArr
-      )
-        ? transactionReqDetails.transactionDetailsArr.join("; ")
-        : transactionReqDetails.transactionDetailsArr || "",
-      transactionCode: transactionReqDetails.transactionCode,
-      queueNumber: queueNumber,
-    };
-
-    const response = await fetch(`${PRINTER_SERVER}/pickUpPrint`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(printPayload),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Print server responded with error:", text);
-      // allow future prints
-      setIsPrinting(false);
-      throw new Error("Printing failed");
-    }
-    // Keep isPrinting=true until we navigate away (prevents duplicate clicks/spam).
-    // We await the simulated delays so the UI can't trigger another print immediately.
     try {
       // wait simulated print delay
       await new Promise((res) => setTimeout(res, 1003));
@@ -160,48 +129,9 @@ export const usePickupHooks = () => {
       setScanStatus("error");
     } finally {
       // small cooldown to prevent accidental re-clicks after navigation
-      setTimeout(() => setIsPrinting(false), 1000);
+      setTimeout(() => setIsDisplaying(false), 1000);
     }
   };
-
-  // const handleScan = async () => {
-  //   // ... (This function remains unchanged)
-  //   if (scanStatus !== "idle") return;
-  //   setScanStatus("waiting");
-
-  //   try {
-  //     const transactionData = await getTransactionByCode("demo"); // Replace with actual scanned code
-  //     const transactions = transactionData.transactions;
-
-  //     if (!transactions || transactions.length === 0) {
-  //       setScanStatus("error");
-  //       setTransactionReqDetails(null);
-  //       return;
-  //     }
-
-  //     // Use the first one only for personal info & office
-  //     const first = transactions[0];
-
-  //     const detailsObj = {
-  //       id: first.personalInfo.id,
-  //       transactionCode: first.personalInfo.transactionCode,
-  //       fullName:
-  //         first.personalInfo.fullName ||
-  //         `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
-  //       officeId: first.office.office_id,
-  //       officeName: first.office.office_name,
-  //       // Get all transaction details
-  //       transactionDetailsArr: transactions.map((t) => t.transactionDetails),
-  //     };
-
-  //     console.log("✅ Combined transaction details:", detailsObj);
-  //     setTransactionReqDetails(detailsObj);
-  //     setScanStatus("success");
-  //   } catch (error) {
-  //     console.error("❌ Error during scan:", error);
-  //     setScanStatus("error");
-  //   }
-  // };
 
   // Trigger a hardware scan via the Pi scanner server.
   // POST /api/trigger-scan will wait until the next barcode is read and return it.
@@ -258,8 +188,8 @@ export const usePickupHooks = () => {
 
       // Filter transactions that have last step stepNumber === 3 (same validation as manual submit)
       const filteredTransactions = transactions.filter((transaction) => {
-        const walkin = transaction.personalInfo.type;
-        if (walkin === "online") return false;
+        const online = transaction.personalInfo.type;
+        if (online === "walkin") return false;
         const steps = transaction.steps;
         if (!steps || steps.length === 0) return false;
         const lastStep = steps[steps.length - 1];
@@ -321,43 +251,6 @@ export const usePickupHooks = () => {
     }
   }, [captureMode]);
 
-  // const handleScannedCode = async (raw) => {
-  //   const scannedCode = parseScannedCode(raw);
-  //   if (!scannedCode) {
-  //     setScanStatus("error");
-  //     return;
-  //   }
-  //   try {
-  //     const transactionData = await getTransactionByCode(scannedCode);
-  //     const transactions = transactionData.transactions;
-  //     if (!transactions || transactions.length === 0) {
-  //       console.warn("No transactions found for scanned code:", scannedCode);
-  //       setScanStatus("error");
-  //       setCaptureMode(false);
-  //       return;
-  //     }
-
-  //     const first = transactions[0];
-  //     const detailsObj = {
-  //       id: first.personalInfo.id,
-  //       transactionCode: first.personalInfo.transactionCode,
-  //       fullName:
-  //         first.personalInfo.fullName ||
-  //         `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
-  //       officeId: first.office.office_id,
-  //       officeName: first.office.office_name,
-  //       transactionDetailsArr: transactions.map((t) => t.transactionDetails),
-  //     };
-  //     setTransactionReqDetails(detailsObj);
-  //     setScanStatus("success");
-  //     setCaptureMode(false);
-  //   } catch (err) {
-  //     console.error("Error processing scanned code:", err);
-  //     setScanStatus("error");
-  //     setCaptureMode(false);
-  //   }
-  // };
-
   const handleManualCodeSubmit = async () => {
     if (!code) return;
     setScanStatus("waiting");
@@ -370,8 +263,8 @@ export const usePickupHooks = () => {
 
       // Filter transactions that have stepNumber === 3
       const filteredTransactions = transactions.filter((transaction) => {
-        const walkin = transaction.personalInfo.type;
-        if (walkin === "online") return false;
+        const online = transaction.personalInfo.type;
+        if (online === "walkin") return false;
         const steps = transaction.steps;
         if (!steps || steps.length === 0) return false; // no steps
         const lastStep = steps[steps.length - 1]; // get the last step
@@ -450,8 +343,8 @@ export const usePickupHooks = () => {
     setScanStatus,
     transactionReqDetails,
     triggerScan,
-    handlePickupPrint,
-    isPrinting,
+    handleDisplayQueueInMobile,
+    isDisplaying,
     code,
     setCode,
     isValidTransactionCode,

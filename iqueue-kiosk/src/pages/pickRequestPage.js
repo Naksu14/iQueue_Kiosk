@@ -144,7 +144,7 @@ const PickRequestPage = () => {
           text="Scan QR or Enter Transaction Code"
           className="font-bold"
         />
-        <p className="text-gray-600 text-sm mt-1">
+        <p className="text-gray-700 text-md  mt-1">
           Present your QR code or enter your transaction code <br />
           below if scanning is unavailable.
         </p>

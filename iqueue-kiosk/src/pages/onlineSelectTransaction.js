@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaMale, FaBoxOpen, FaInfoCircle } from "react-icons/fa";
+import { FaBoxOpen, FaCreditCard } from "react-icons/fa";
 import Button from "../components/button/button";
 import BackButton from "../components/button/backButton";
 import HelpButton from "../components/button/helpButton";
@@ -8,7 +8,7 @@ import IconContainer from "../components/layout/iconContainer";
 import Header from "../components/layout/header";
 import SubHeader from "../components/layout/subheader";
 
-const WalkinSelectTransaction = () => {
+const OnlineSelectTransaction = () => {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col items-center justify-center h-full px-4">
@@ -21,57 +21,41 @@ const WalkinSelectTransaction = () => {
       </header>
 
       {/* Step Label */}
-      <SubHeader
+      <SubHeader 
         text={
           <>
-            Step 1: Please select{" "}
-            <span className="text-blue-500">Walk-in Request</span> Options to
-           start your transaction.
+            Step 1: Please select <span className="text-yellow-500">Online Request</span> Options to Scan your transaction
           </>
-        }
+        } 
       />
 
       {/* Card Grid */}
-      <div className="grid grid-cols-3 gap-6 mt-3">
+      <div className="grid grid-cols-2 gap-6 mt-3">
         {/* Walk-in Request */}
         <Button
-          onClick={() => navigate("/OfficeServiceSelection")}
+          onClick={() => navigate("/ScanningNewQrPage")}
           className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
-          <IconContainer className="bg-green-600 text-green-600 rounded-full mb-2">
-            <FaMale size={26} />
+          <IconContainer className="p-2 bg-green-600 text-green-600 rounded-full mb-2">
+            <FaCreditCard size={26} />
           </IconContainer>
-          <h2 className="font-semibold text-base mb-1">Request Transaction</h2>
+          <h2 className="font-semibold text-base mb-1">New Transaction/Payment</h2>
           <p className="text-gray-600 text-[13px] font-medium">
-            Make new transaction or service request
+            Scan your QR for new service request or payment
           </p>
         </Button>
 
         {/* Walk-in Pick up Request */}
         <Button
-          onClick={() => navigate("/PickRequestPage")}
+          onClick={() => navigate("/ScanningPage")}
           className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
-          <IconContainer className=" bg-blue-500 text-blue-600 rounded-full mb-2">
+          <IconContainer className="bg-blue-500 text-blue-600 rounded-full mb-2">
             <FaBoxOpen size={26} />
           </IconContainer>
-          <h2 className="font-semibold text-base mb-1">Pick-up Request</h2>
+          <h2 className="font-semibold text-base mb-1">Transaction Pick-up</h2>
           <p className="text-gray-600 text-[13px] font-medium">
-            Claim your request or document
-          </p>
-        </Button>
-
-        {/* Walk-in Inquiry */}
-        <Button
-          onClick={() => navigate("/")}
-          className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
-        >
-          <IconContainer className="bg-yellow-500 text-white rounded-full mb-2">
-            <FaInfoCircle size={26} />
-          </IconContainer>
-          <h2 className="font-semibold text-base mb-1">Inquiry</h2>
-          <p className="text-gray-600 text-[13px] font-medium">
-            Ask about processes or services of school
+            Scan your QR to claim your request or document
           </p>
         </Button>
       </div>
@@ -81,4 +65,4 @@ const WalkinSelectTransaction = () => {
     </div>
   );
 };
-export default WalkinSelectTransaction;
+export default OnlineSelectTransaction;
