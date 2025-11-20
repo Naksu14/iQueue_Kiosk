@@ -83,10 +83,6 @@ export const useInputInfo = () => {
       const transactions = JSON.parse(
         localStorage.getItem("transactions") || "[]"
       );
-      console.log(
-        "✅ Transactions retrieved for queue creation.",
-        transactions
-      );
 
       // Collect unique office names from transactions (filter out falsy)
       const uniqueOfficeNames = [
@@ -124,7 +120,6 @@ export const useInputInfo = () => {
         queueType: "Walk-in",
         personalInfoId,
       };
-      console.log("✅ Queue payload prepared.", queuePayload);
 
       //console.log("Queue Payload:", queuePayload);
 

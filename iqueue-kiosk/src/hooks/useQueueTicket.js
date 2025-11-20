@@ -116,7 +116,6 @@ export const useQueueTicket = () => {
             //console.log(" Updating queue status → waiting:", safeQueueId);
             try {
               await updateQueueNoStatus(safeQueueId, "waiting");
-              console.log(" Queue status updated successfully!");
             } catch (error) {
               console.error(" Failed to update queue status:", error);
             }

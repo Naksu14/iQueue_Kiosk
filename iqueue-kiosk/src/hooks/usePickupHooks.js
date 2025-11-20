@@ -150,7 +150,6 @@ export const usePickupHooks = () => {
         }
         try {
           await updateQueueNoStatus(queueNumberId, "waiting");
-          console.log(" Queue status updated successfully!");
         } catch (error) {
           console.error(" Failed to update queue status:", error);
         }
@@ -240,12 +239,12 @@ export const usePickupHooks = () => {
 
       const raw = data.qrCode || data.code || data.value || "";
       const scannedCode = parseScannedCode(raw);
-      console.log(
-        "Scanned code from Pi (raw):",
-        raw,
-        "=> parsed:",
-        scannedCode
-      );
+      // console.log(
+      //   "Scanned code from Pi (raw):",
+      //   raw,
+      //   "=> parsed:",
+      //   scannedCode
+      // );
 
       // Reuse existing flow: fetch transaction by code and populate UI
       const transactionData = await getTransactionByCode(scannedCode);

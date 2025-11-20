@@ -119,7 +119,6 @@ export const useOnlineScanningHooks = () => {
         }
         try {
           await updateQueueNoStatus(queueNumberId, "waiting");
-          console.log(" Queue status updated successfully!");
         } catch (error) {
           console.error(" Failed to update queue status:", error);
         }
@@ -170,12 +169,6 @@ export const useOnlineScanningHooks = () => {
 
       const raw = data.qrCode || data.code || data.value || "";
       const scannedCode = parseScannedCode(raw);
-      console.log(
-        "Scanned code from Pi (raw):",
-        raw,
-        "=> parsed:",
-        scannedCode
-      );
 
       // Reuse existing flow: fetch transaction by code and populate UI
       const transactionData = await getTransactionByCode(scannedCode);
