@@ -41,7 +41,7 @@ const ScanningPage = () => {
         <div className="flex-1 p-6 bg-white shadow-md rounded-lg text-left border border-gray-100 transition-all duration-200 hover:shadow-lg">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xl font-semibold text-gray-800">
-              Transaction
+              Transaction Details
             </h2>
             <span className="text-sm text-gray-500">
               {new Date().toLocaleDateString()}
@@ -62,7 +62,7 @@ const ScanningPage = () => {
               </li>
               <li className="flex flex-col">
                 <span className="font-medium text-gray-800">
-                  Transaction/Request Details:
+                  Request Documents:
                 </span>
                 <span className="text-gray-600">
                   {item.transactionDetailsArr &&
@@ -124,10 +124,10 @@ const ScanningPage = () => {
             {isDisplaying ? (
               <>
                 <ImSpinner2 className="animate-spin text-2xl text-white" />
-                <span>Printing...</span>
+                <span>Getting Queue Number...</span>
               </>
             ) : (
-              "Print Ticket"
+              "Get Queue Number"
             )}
           </Button>
         </div>
