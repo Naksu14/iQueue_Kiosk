@@ -5,7 +5,7 @@ import Button from "../components/button/button";
 import IconContainer from "../components/layout/iconContainer";
 import SubHeader from "../components/layout/subheader";
 import BackButton from "../components/button/backButton";
-import {useNewOnlineScanningHooks} from "../hooks/useNewOnlineScanningHooks";
+import { useNewOnlineScanningHooks } from "../hooks/useNewOnlineScanningHooks";
 import { useKeyboard } from "../context/KeyboardContext";
 
 const ScanningNewQrPage = () => {
@@ -33,10 +33,48 @@ const ScanningNewQrPage = () => {
     const detailsList = Array.isArray(transactionReqDetails)
       ? transactionReqDetails
       : [transactionReqDetails];
+
+    // Precompute display office info for each item so JSX stays simple
+    const augmentedList = detailsList.map((item) => {
+      // Only consider transactions that are relevant for routing:
+      // - unpaid payments (paymentStatus === 'Unpaid')
+      // - pending status (status === 'pending')
+      // - inquiries (transactionType === 'Inquiry')
+      const txObjects = (item.transactionObjects || []).filter(
+        (t) =>
+          t.transactionType === "Inquiry" ||
+          (t.paymentStatus === "Unpaid" && t.status === "pending")
+      );
+      const uniqueOfficeNames = [
+        ...new Set(
+          txObjects.map(
+            (t) => (t.office && t.office.office_name) || item.officeName
+          )
+        ),
+      ].filter(Boolean);
+      const allInquiry =
+        txObjects.length > 0 &&
+        txObjects.every((t) => t.transactionType === "Inquiry");
+      let displayOffice;
+      let officeInvolvedDisplay = uniqueOfficeNames;
+      if (allInquiry) {
+        displayOffice =
+          uniqueOfficeNames.length > 1
+            ? "Multiple"
+            : uniqueOfficeNames[0] || item.officeName;
+      } else {
+        const accountingName = "Accounting Office";
+        const others = uniqueOfficeNames.filter((n) => n !== accountingName);
+        officeInvolvedDisplay = [accountingName, ...others];
+        officeInvolvedDisplay = Array.from(new Set(officeInvolvedDisplay));
+        displayOffice = accountingName;
+      }
+      return { ...item, displayOffice, officeInvolvedDisplay };
+    });
     return (
       <div className="flex flex-col items-center">
         <header className="text-center w-full max-w-md">
-          <SubHeader text="Your Pick-up Request" className="font-bold" />
+          <SubHeader text="Confirm Your Transaction" className="font-bold" />
         </header>
         <div className="flex-1 p-6 bg-white shadow-md rounded-lg text-left border border-gray-100 transition-all duration-200 hover:shadow-lg">
           <div className="flex items-center justify-between mb-2">
@@ -47,75 +85,84 @@ const ScanningNewQrPage = () => {
               {new Date().toLocaleDateString()}
             </span>
           </div>
-          {detailsList.map((item, idx) => (
-            <ul
-              key={item.id + "-" + item.transactionCode + "-" + idx}
-              className="space-y-2 text-gray-700 mb-2"
-            >
-              <li>
-                <span className="font-medium text-gray-800">Student Name:</span>{" "}
-                <span className="text-gray-600">{item.fullName}</span>
-              </li>
-              <li>
-                <span className="font-medium text-gray-800">Office:</span>{" "}
-                <span className="text-gray-600">{item.officeName}</span>
-              </li>
-              <li className="flex flex-col">
-                <span className="font-medium text-gray-800">
-                  Pick-Up Document:
-                </span>
-                <span className="text-gray-600">
-                  {item.transactionDetailsArr &&
-                  item.transactionDetailsArr.length > 0 ? (
-                    <ul className="list-disc list-inside space-y-1">
-                      {item.transactionDetailsArr.map((detail, index) => (
-                        <li key={index}>{detail}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    "No details"
-                  )}
-                </span>
-              </li>
-              <li className="border-t pt-3 mt-3 text-gray-600">
-                <span className="font-medium text-gray-800">Instructions:</span>{" "}
-                Present your valid ID & Student ID
-              </li>
-              {/* Estimated Wait */}
-              {typeof item.estimatedWait === "number" &&
-              item.estimatedWait > 0 ? (
-                <li className="flex flex-wrap justify-center items-center gap-2">
-                  {item.countWaiting > 0 && (
-                    <span className="text-gray-500">
-                      {item.countWaiting} Queue,
-                    </span>
-                  )}
+          {augmentedList.map((item, idx) => {
+            const visibleDetails = (item.transactionObjects || [])
+              .filter((t) => t.paymentStatus === "Unpaid")
+              .map((t) => t.transactionDetails)
+              .filter(Boolean);
+            return (
+              <ul
+                key={item.id + "-" + item.transactionCode + "-" + idx}
+                className="space-y-2 text-gray-700 mb-2"
+              >
+                <li>
                   <span className="font-medium text-gray-800">
-                    Estimated Wait:
+                    Student Name:
                   </span>{" "}
-                  <span className="text-orange-500 font-semibold">
-                    {(() => {
-                      const sec = Math.round(item.estimatedWait);
-                      if (sec < 60) return ` ${sec}s`;
-                      const min = Math.floor(sec / 60);
-                      if (min < 60) return ` ${min} min`;
-                      const hr = Math.floor(min / 60);
-                      const remMin = min % 60;
-                      return `${hr} hr${hr > 1 ? "s" : ""}${
-                        remMin > 0 ? ` ${remMin} min` : ""
-                      }`;
-                    })()}
+                  <span className="text-gray-600">{item.fullName}</span>
+                </li>
+                <li>
+                  <span className="font-medium text-gray-800">Go to:</span>{" "}
+                  <span className="text-gray-600">{item.displayOffice}</span>
+                </li>
+                <li className="flex flex-col">
+                  <span className="font-medium text-gray-800">
+                    Request Document:
+                  </span>
+                  <span className="text-gray-600">
+                    {visibleDetails && visibleDetails.length > 0 ? (
+                      <ul className="list-disc list-inside space-y-1">
+                        {visibleDetails.map((detail, index) => (
+                          <li key={index}>{detail}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      "No details"
+                    )}
                   </span>
                 </li>
-              ) : (
-                <li className="text-center">
-                  <span className="text-gray-400 font-semibold">
-                    No Queue Waiting
-                  </span>
+
+                <li className="border-t pt-3 mt-3 text-gray-600">
+                  <span className="font-medium text-gray-800">
+                    Instructions:
+                  </span>{" "}
+                  Present your valid ID & Student ID
                 </li>
-              )}
-            </ul>
-          ))}
+                {typeof item.estimatedWait === "number" &&
+                item.estimatedWait > 0 ? (
+                  <li className="flex flex-wrap justify-center items-center gap-2">
+                    {item.countWaiting > 0 && (
+                      <span className="text-gray-500">
+                        {item.countWaiting} Queue,
+                      </span>
+                    )}
+                    <span className="font-medium text-gray-800">
+                      Estimated Wait:
+                    </span>{" "}
+                    <span className="text-orange-500 font-semibold">
+                      {(() => {
+                        const sec = Math.round(item.estimatedWait);
+                        if (sec < 60) return ` ${sec}s`;
+                        const min = Math.floor(sec / 60);
+                        if (min < 60) return ` ${min} min`;
+                        const hr = Math.floor(min / 60);
+                        const remMin = min % 60;
+                        return `${hr} hr${hr > 1 ? "s" : ""}${
+                          remMin > 0 ? ` ${remMin} min` : ""
+                        }`;
+                      })()}
+                    </span>
+                  </li>
+                ) : (
+                  <li className="text-center">
+                    <span className="text-gray-400 font-semibold">
+                      No Queue Waiting
+                    </span>
+                  </li>
+                )}
+              </ul>
+            );
+          })}
           <Button
             className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow hover:shadow-md hover:opacity-90 transition duration-200 flex items-center justify-center gap-2"
             onClick={handleDisplayQueueInMobile}
@@ -144,7 +191,7 @@ const ScanningNewQrPage = () => {
           className="font-bold"
         />
         <p className="text-gray-700 text-md  mt-1">
-          Present your QR code to proceed with a New Service Request or Payment. 
+          Present your QR code to proceed with a New Service Request or Payment.
         </p>
       </header>
 

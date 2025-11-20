@@ -36,7 +36,7 @@ const ScanningPage = () => {
     return (
       <div className="flex flex-col items-center">
         <header className="text-center w-full max-w-md">
-          <SubHeader text="Your Pick-up Request" className="font-bold" />
+          <SubHeader text="Confirm Your Pick-up Request" className="font-bold" />
         </header>
         <div className="flex-1 p-6 bg-white shadow-md rounded-lg text-left border border-gray-100 transition-all duration-200 hover:shadow-lg">
           <div className="flex items-center justify-between mb-2">

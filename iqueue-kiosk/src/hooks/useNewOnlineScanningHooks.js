@@ -82,12 +82,47 @@ export const useNewOnlineScanningHooks = () => {
       setIsDisplaying(false);
       return;
     }
+
+    // Decide which office should receive the queue number.
+    // If all transactions are Inquiry -> route to their specific office(s).
+    // If any transaction requires payment/pending -> route to Accounting.
+    const txObjects = transactionReqDetails.transactionObjects || [];
+    const uniqueOfficeNames = [
+      ...new Set(
+        txObjects.map(
+          (t) =>
+            (t.office && t.office.office_name) ||
+            transactionReqDetails.officeName
+        )
+      ).values(),
+    ].filter(Boolean);
+
+    const allInquiry =
+      txObjects.length > 0 &&
+      txObjects.every((t) => t.transactionType === "Inquiry");
+
+    let officeInvolved = [...uniqueOfficeNames];
+    let mainOffice;
+
+    if (allInquiry) {
+      mainOffice =
+        officeInvolved.length > 1
+          ? "Multiple"
+          : officeInvolved[0] || transactionReqDetails.officeName;
+    } else {
+      const accountingName = "Accounting Office";
+      const others = uniqueOfficeNames.filter((n) => n !== accountingName);
+      officeInvolved = [accountingName, ...others];
+      officeInvolved = Array.from(new Set(officeInvolved));
+      mainOffice = accountingName;
+    }
+
     const queuePayload = {
-      office: transactionReqDetails.officeName,
-      officeInvolved: [transactionReqDetails.officeName],
+      office: mainOffice,
+      officeInvolved,
       personalInfoId: transactionReqDetails.id,
       queueType: "Online",
-      pickUp: true,
+      pickUp: false,
     };
     try {
       const queueNumberId = await createQueueNumber(queuePayload);
@@ -188,10 +223,10 @@ export const useNewOnlineScanningHooks = () => {
       const filteredTransactions = transactions.filter((transaction) => {
         const online = transaction.personalInfo.type;
         if (online === "walkin") return false;
-        const steps = transaction.steps;
-        if (!steps || steps.length === 0) return false;
-        const lastStep = steps[steps.length - 1];
-        return lastStep.stepNumber === 1;
+        const paymentStatus = transaction.paymentStatus;
+        const status = transaction.status;
+        if (paymentStatus !== "Unpaid" && status !== "pending") return false;
+        return true;
       });
 
       if (filteredTransactions.length === 0) {
@@ -216,6 +251,9 @@ export const useNewOnlineScanningHooks = () => {
         transactionDetailsArr: filteredTransactions.map(
           (t) => t.transactionDetails
         ),
+        // include the full filtered transactions so downstream logic can
+        // decide routing (Accounting vs specific office)
+        transactionObjects: filteredTransactions,
       };
 
       setTransactionReqDetails(detailsObj);
@@ -255,6 +293,7 @@ export const useNewOnlineScanningHooks = () => {
     try {
       const transactionData = await getTransactionByCode(code);
       const transactions = transactionData.transactions;
+      console.log(" Transactions fetched for manual code:", transactions);
 
       if (!transactions || transactions.length === 0)
         throw new Error("No transactions found");
@@ -263,10 +302,10 @@ export const useNewOnlineScanningHooks = () => {
       const filteredTransactions = transactions.filter((transaction) => {
         const online = transaction.personalInfo.type;
         if (online === "walkin") return false;
-        const steps = transaction.steps;
-        if (!steps || steps.length === 0) return false; // no steps
-        const lastStep = steps[steps.length - 1]; // get the last step
-        return lastStep.stepNumber === 1;
+        const paymentStatus = transaction.paymentStatus;
+        const status = transaction.status;
+        if (paymentStatus !== "Unpaid" && status === "pending") return false;
+        return true;
       });
 
       // If no transaction has stepNumber 1, stop and show error
@@ -291,6 +330,7 @@ export const useNewOnlineScanningHooks = () => {
         transactionDetailsArr: filteredTransactions.map(
           (t) => t.transactionDetails
         ),
+        transactionObjects: filteredTransactions,
       };
       setTransactionReqDetails(detailsObj);
 
