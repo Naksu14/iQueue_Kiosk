@@ -205,7 +205,6 @@ export const useNewOnlineScanningHooks = () => {
       const raw = data.qrCode || data.code || data.value || "";
       const scannedCode = parseScannedCode(raw);
 
-
       const transactionData = await getTransactionByCode(scannedCode);
       const transactions = transactionData.transactions;
       if (!transactions || transactions.length === 0) {
@@ -220,6 +219,7 @@ export const useNewOnlineScanningHooks = () => {
         const paymentStatus = transaction.paymentStatus;
         const status = transaction.status;
         if (paymentStatus !== "Unpaid" && status !== "pending") return false;
+        if (status !== "pending") return false;
         return true;
       });
 
@@ -286,6 +286,7 @@ export const useNewOnlineScanningHooks = () => {
     setScanStatus("waiting");
     try {
       const transactionData = await getTransactionByCode(code);
+      console.log("Transaction data retrieved:", transactionData);
       const transactions = transactionData.transactions;
 
       if (!transactions || transactions.length === 0)
@@ -298,6 +299,7 @@ export const useNewOnlineScanningHooks = () => {
         const paymentStatus = transaction.paymentStatus;
         const status = transaction.status;
         if (paymentStatus !== "Unpaid" && status === "pending") return false;
+        if (status !== "pending") return false;
         return true;
       });
 
