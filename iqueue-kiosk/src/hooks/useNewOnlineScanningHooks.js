@@ -207,15 +207,18 @@ export const useNewOnlineScanningHooks = () => {
 
       const transactionData = await getTransactionByCode(scannedCode);
       const transactions = transactionData.transactions;
-      if (!transactions || transactions.length === 0)
-        throw new Error("No transactions found");
+      if (!transactions || transactions.length === 0) {
+        console.warn("No transactions found for scanned code:", scannedCode);
+        setScanStatus("error");
+        return;
+      }
 
       const filteredTransactions = transactions.filter((transaction) => {
         const online = transaction.personalInfo.type;
         if (online === "walkin") return false;
         const paymentStatus = transaction.paymentStatus;
         const status = transaction.status;
-        if (paymentStatus !== "Unpaid" && status !== "pending") return false;
+        if (paymentStatus !== "Unpaid" && status === "pending") return false;
         if (status !== "pending") return false;
         return true;
       });
