@@ -210,7 +210,7 @@ export const useNewOnlineScanningHooks = () => {
       if (!transactions || transactions.length === 0) {
         console.warn("No transactions found for scanned code:", scannedCode);
         setScanStatus("error");
-        return;
+        return false;
       }
 
       const filteredTransactions = transactions.filter((transaction) => {
