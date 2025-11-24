@@ -207,11 +207,8 @@ export const useNewOnlineScanningHooks = () => {
 
       const transactionData = await getTransactionByCode(scannedCode);
       const transactions = transactionData.transactions;
-      if (!transactions || transactions.length === 0) {
-        console.warn("No transactions found for scanned code:", scannedCode);
-        setScanStatus("error");
-        return false;
-      }
+      if (!transactions || transactions.length === 0)
+        throw new Error("No transactions found");
 
       const filteredTransactions = transactions.filter((transaction) => {
         const online = transaction.personalInfo.type;
