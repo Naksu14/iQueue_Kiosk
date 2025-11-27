@@ -22,6 +22,20 @@ export const useQueueTicket = () => {
     setPrintStatus("waiting");
 
     try {
+      //console.log("Submitting transactions:", transactions);
+
+      // Send transactions to backend
+      const transactionArray = await createUserTransaction(transactions);
+      // console.log(" Transactions created:", res);
+
+      //  Get queueNumberId from backend or localStorage (fallback)
+      const queueNumberId =
+        transactionArray?.queueNumberId ||
+        localStorage.getItem("queueNumberId");
+
+      // Save again just to be sure (prevents null issues later)
+      localStorage.setItem("queueNumberId", queueNumberId);
+
       // Print locally via Raspberry Pi
       const transactionCode = localStorage.getItem("transactionCode");
       const queueNumber = localStorage.getItem("queueNumber");
@@ -29,7 +43,7 @@ export const useQueueTicket = () => {
       const payload = {
         queueNumber,
         transactionCode,
-        transactions,
+        transactionArray,
       };
 
       //  Call printer server (configurable via REACT_APP_PRINTER_SERVER) ============================================== actual print call
@@ -46,18 +60,6 @@ export const useQueueTicket = () => {
         setPrintStatus("error");
         throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
       }
-
-      // Send transactions to backend
-      const transactionArray = await createUserTransaction(transactions);
-      // console.log(" Transactions created:", res);
-
-      //  Get queueNumberId from backend or localStorage (fallback)
-      const queueNumberId =
-        transactionArray?.queueNumberId ||
-        localStorage.getItem("queueNumberId");
-
-      // Save again just to be sure (prevents null issues later)
-      localStorage.setItem("queueNumberId", queueNumberId);
 
       // Simulate ticket printing delay
       setTimeout(() => {
