@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { createUserTransaction } from "../services/dbServices/createTransactionService";
 import { useTransaction } from "../context/walkinTransactionContext";
 import { updateQueueNoStatus } from "../services/dbServices/addQueueNumber";
-import { getOfficeById } from "../services/dbServices/officeKioskService";
 export const useQueueTicket = () => {
   const navigate = useNavigate();
   const [printStatus, setPrintStatus] = useState("idle");
@@ -23,58 +22,14 @@ export const useQueueTicket = () => {
     setPrintStatus("waiting");
 
     try {
-      //console.log("Submitting transactions:", transactions);
-
-      // Send transactions to backend
-      const transactionArray = await createUserTransaction(transactions);
-      // console.log(" Transactions created:", res);
-
-      //  Get queueNumberId from backend or localStorage (fallback)
-      const queueNumberId =
-        transactionArray?.queueNumberId ||
-        localStorage.getItem("queueNumberId");
-
-      // Save again just to be sure (prevents null issues later)
-      localStorage.setItem("queueNumberId", queueNumberId);
-
       // Print locally via Raspberry Pi
       const transactionCode = localStorage.getItem("transactionCode");
       const queueNumber = localStorage.getItem("queueNumber");
-      const date = new Date().toLocaleDateString();
-      const time = new Date().toLocaleTimeString();
-
-      // Assuming `res` contains an array of transactions  ============================================== Console log ticket details
-      console.log("\n===============================================");
-      console.log("           Jesus Good Shepherd School");
-      console.log("              Transaction Slip");
-      console.log("------------------------------------------------");
-      console.log(`Date: ${date}             Time: ${time}`);
-      console.log("");
-      console.log(`               Queue No: ${queueNumber}`);
-      console.log("------------------------------------------------");
-      console.log("Transaction:");
-
-      if (Array.isArray(transactionArray) && transactionArray.length > 0) {
-        for (let i = 0; i < transactionArray.length; i++) {
-          const t = transactionArray[i];
-          const office = await getOfficeById(t.office.office_id);
-          console.log(`${office.office_name}`);
-          console.log(`   ${t.transactionDetails}`);
-          if (t.fee) console.log(`   Fee: Php ${t.fee * t.copies}`);
-          console.log(""); // spacing between transactions
-        }
-      }
-
-      console.log("------------------------------------------------");
-      console.log(`Transaction Code: ${transactionCode}`);
-      console.log("------------------------------------------------");
-      console.log("      Thank you for using iQueue!");
-      console.log("===============================================\n");
 
       const payload = {
         queueNumber,
         transactionCode,
-        transactionArray,
+        transactions,
       };
 
       //  Call printer server (configurable via REACT_APP_PRINTER_SERVER) ============================================== actual print call
@@ -91,6 +46,18 @@ export const useQueueTicket = () => {
         setPrintStatus("error");
         throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
       }
+
+      // Send transactions to backend
+      const transactionArray = await createUserTransaction(transactions);
+      // console.log(" Transactions created:", res);
+
+      //  Get queueNumberId from backend or localStorage (fallback)
+      const queueNumberId =
+        transactionArray?.queueNumberId ||
+        localStorage.getItem("queueNumberId");
+
+      // Save again just to be sure (prevents null issues later)
+      localStorage.setItem("queueNumberId", queueNumberId);
 
       // Simulate ticket printing delay
       setTimeout(() => {

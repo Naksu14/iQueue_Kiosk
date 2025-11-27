@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import SubHeader from "../components/layout/subheader";
@@ -10,6 +10,36 @@ const InputInformation = () => {
   const navigate = useNavigate();
   const { formData, handleChange, handleSubmit, isSubmitting } = useInputInfo();
   const { showKeyboard, isVisible, hideKeyboard } = useKeyboard();
+
+  const [showVisitorModal, setShowVisitorModal] = useState(false);
+
+  const handleVisitorCheckboxChange = (e) => {
+    const checked = e.target.checked;
+    handleChange({ target: { name: "isVisitor", value: checked } });
+    if (checked) {
+      setShowVisitorModal(true);
+    } else {
+      // clear visitor name when unchecked
+      handleChange({ target: { name: "visitorName", value: "" } });
+      setShowVisitorModal(false);
+    }
+  };
+
+  const handleSaveVisitorName = () => {
+    setShowVisitorModal(false);
+    hideKeyboard();
+  };
+
+  const handleCancelVisitor = () => {
+    // uncheck visitor and clear name
+    handleChange({ target: { name: "isVisitor", value: false } });
+    handleChange({ target: { name: "visitorName", value: "" } });
+    setShowVisitorModal(false);
+    hideKeyboard();
+  };
+
+  const visitorNameVal = (formData.visitorName || "").toString();
+  const isVisitorNameValid = visitorNameVal.trim().length > 0;
 
   // Helper to focus and scroll input into view
   const handleFocus = (e) => {
@@ -40,7 +70,7 @@ const InputInformation = () => {
             <SubHeader text="Step 4: Help us identify and process your request faster" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
             <div className="col-span-2">
               <label className="block font-semibold mb-1">
                 ID number <span className="text-red-500">*</span>
@@ -63,18 +93,38 @@ const InputInformation = () => {
               />
             </div>
 
-            {/* Alumni Checkbox */}
-            <div className="flex flex-col">
-              <label className="font-semibold mr-3">Alumni</label>
-              <div className="flex items-center h-14">
-                <input
-                  type="checkbox"
-                  name="isAlumni"
-                  checked={formData.isAlumni}
-                  onChange={handleChange}
-                  className="w-5 h-5 accent-green-600"
-                />
-                <span className="ml-2 text-sm text-gray-600">Check if yes</span>
+            <div className="w-full flex col-span-2 gap-6">
+              {/* Alumni Checkbox */}
+              <div className="flex flex-col">
+                <label className="font-semibold mr-3">Alumni</label>
+                <div className="flex items-center h-14">
+                  <input
+                    type="checkbox"
+                    name="isAlumni"
+                    checked={formData.isAlumni}
+                    onChange={handleChange}
+                    className="w-5 h-5 accent-green-600"
+                  />
+                  <span className="ml-2 text-sm text-gray-600">
+                    Check if yes
+                  </span>
+                </div>
+              </div>
+              {/* Alumni Checkbox */}
+              <div className="flex flex-col">
+                <label className="font-semibold mr-3">Visitor</label>
+                <div className="flex items-center h-14">
+                  <input
+                    type="checkbox"
+                    name="isVisitor"
+                    checked={formData.isVisitor}
+                    onChange={handleVisitorCheckboxChange}
+                    className="w-5 h-5 accent-green-600"
+                  />
+                  <span className="ml-2 text-sm text-gray-600">
+                    Check if yes
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -251,6 +301,51 @@ const InputInformation = () => {
       </div>
 
       <BackButton onClick={() => navigate(-1)} />
+      {showVisitorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div
+            className="bg-white rounded-lg w-[90%] max-w-md p-6"
+            style={{ paddingBottom: isVisible ? 240 : "" }}
+          >
+            <h3 className="text-lg font-semibold mb-4">Visitor Name</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Please enter the visitor's name.
+            </p>
+            <input
+              type="text"
+              name="visitorName"
+              value={formData.visitorName || ""}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              className="w-full border rounded-md px-4 py-3 bg-gray-100 mb-2"
+              placeholder="Visitor full name"
+              required
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={handleCancelVisitor}
+                className="px-4 py-2 rounded-md bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveVisitorName}
+                disabled={!isVisitorNameValid}
+                aria-disabled={!isVisitorNameValid}
+                className={`px-4 py-2 rounded-md ${
+                  isVisitorNameValid
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                }`}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

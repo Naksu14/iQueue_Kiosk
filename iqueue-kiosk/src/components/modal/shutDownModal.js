@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useKeyboard } from "../../context/KeyboardContext";
-import { useRef, useEffect } from "react";
 export default function ShutdownModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState("password"); // "password" or "select"
@@ -47,7 +46,7 @@ export default function ShutdownModal() {
         // Trim whitespace and build server URL relative to current host so it works
         // when the frontend is served from the Pi's IP instead of localhost.
         const trimmed = (password || "").trim();
-        const host = window?.location?.hostname || 'localhost';
+        const host = window?.location?.hostname || "localhost";
         const base = `http://${host}:3001`;
 
         const res = await fetch(`${base}/kiosk-validate`, {
@@ -58,7 +57,7 @@ export default function ShutdownModal() {
         if (!res.ok) {
           // invalid password or server error — close modal as requested
           const body = await res.json().catch(() => ({}));
-          alert(body.message || 'Invalid password');
+          alert(body.message || "Invalid password");
           closeModal();
           return;
         }
@@ -68,8 +67,8 @@ export default function ShutdownModal() {
         // hide keyboard when moving to select step
         hideKeyboard();
       } catch (err) {
-        console.error('Validation error', err);
-        alert('Failed to validate password');
+        console.error("Validation error", err);
+        alert("Failed to validate password");
         hideKeyboard();
         closeModal();
       }
@@ -78,7 +77,7 @@ export default function ShutdownModal() {
 
   const handleAction = async (action) => {
     try {
-      const host = window?.location?.hostname || 'localhost';
+      const host = window?.location?.hostname || "localhost";
       const base = `http://${host}:3001`;
 
       const res = await fetch(`${base}/kiosk-control`, {
@@ -105,7 +104,7 @@ export default function ShutdownModal() {
   useEffect(() => {
     // if modal closes, ensure keyboard is hidden
     if (!isOpen) hideKeyboard();
-  }, [isOpen]);
+  }, [isOpen, hideKeyboard]);
 
   return (
     <div>
@@ -124,8 +123,9 @@ export default function ShutdownModal() {
           style={{ paddingBottom: isVisible ? 240 : 0 }}
           onClick={handleBackdropClick}
         >
-          <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-md overflow-y-auto px-6 py-5 relative"
-            style={{ maxHeight: isVisible ? '' : '90vh' }}
+          <div
+            className="bg-white rounded-lg shadow-lg w-[90%] max-w-md overflow-y-auto px-6 py-5 relative"
+            style={{ maxHeight: isVisible ? "" : "90vh" }}
           >
             {/* Close button */}
             <button
@@ -138,8 +138,9 @@ export default function ShutdownModal() {
 
             {/* Header */}
             <div className="flex flex-col items-center mb-4">
-              <h2 className="text-xl font-bold text-center">Authorize Access to Kiosk Control</h2>
-              
+              <h2 className="text-xl font-bold text-center">
+                Authorize Access to Kiosk Control
+              </h2>
             </div>
 
             {/* Body */}
