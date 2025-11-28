@@ -1,5 +1,6 @@
 import express from "express";
 import { writeFileSync, unlinkSync } from "fs";
+import { promises as fsp } from "fs";
 import bodyParser from "body-parser";
 import { exec } from "child_process";
 import cors from "cors";
@@ -68,6 +69,113 @@ app.use(express.json());
 
 // Health check endpoint
 app.get("/ping", (req, res) => res.json({ ok: true }));
+
+// Simple printer paper-status checker using ESC/POS DLE EOT 1 (0x10 0x04 0x01).
+// This is best-effort: it writes the status-request bytes to the device and
+// attempts to read a single response byte with a short timeout. Many ESC/POS
+// printers respond with a status byte; this code returns the raw byte (hex)
+// and a conservative heuristic `hasPaper` boolean. If the device doesn't
+// respond the endpoint reports no-response.
+// Check printer status using DLE EOT n (0x10 0x04 n). `statusType` is the n value.
+async function checkPrinterPaper(devicePath = "/dev/usb/lp0", timeoutMs = 700, statusType = 1) {
+  const req = Buffer.from([0x10, 0x04, statusType]); // DLE EOT n
+  try {
+    const fd = await fsp.open(devicePath, "r+");
+    try {
+      // Write request
+      await fd.write(req);
+
+      // Attempt to read a single byte with a timeout
+      const readPromise = fd.read(Buffer.alloc(1), 0, 1, null).then(({ bytesRead, buffer }) => {
+        if (bytesRead === 1) return buffer[0];
+        return null;
+      });
+
+      const timeout = new Promise((resolve) => setTimeout(() => resolve(null), timeoutMs));
+      const resByte = await Promise.race([readPromise, timeout]);
+
+      await fd.close();
+
+      if (resByte === null) {
+        return { ok: false, message: "no-response", raw: null, hasPaper: null };
+      }
+
+      const hex = resByte.toString(16).padStart(2, "0");
+
+      // Heuristic: many ESC/POS printers use bit 5 (0x20) in the response to
+      // indicate paper end / paper sensor. This heuristic treats bit 5 == 0 as
+      // "has paper" and bit 5 == 1 as "no paper". Results may vary by model.
+      const hasPaper = (resByte & 0x20) === 0;
+
+      return { ok: true, raw: hex, hasPaper };
+    } catch (err) {
+      try {
+        await fd.close();
+      } catch (e) {}
+      return { ok: false, message: "io-error", error: String(err) };
+    }
+  } catch (err) {
+    return { ok: false, message: "open-failed", error: String(err) };
+  }
+}
+
+// Perform multiple quick reads and return a stable majority result.
+async function getStablePaperStatus(devicePath = "/dev/usb/lp0", statusType = 2, attempts = 3, delayMs = 120) {
+  const readings = [];
+  for (let i = 0; i < attempts; i++) {
+    const r = await checkPrinterPaper(devicePath, 500, statusType);
+    // If IO failed, record as null so it doesn't count toward majority
+    if (!r || !r.ok) {
+      readings.push(null);
+    } else {
+      readings.push(r.hasPaper === true ? 1 : 0);
+    }
+    // small delay between attempts
+    if (i < attempts - 1) await new Promise((res) => setTimeout(res, delayMs));
+  }
+
+  // Count only non-null readings
+  const valid = readings.filter((v) => v === 0 || v === 1);
+  if (valid.length === 0) return { ok: false, message: "no-valid-responses", readings };
+
+  const ones = valid.filter((v) => v === 1).length;
+  const zeros = valid.length - ones;
+  const hasPaper = ones > zeros;
+  return { ok: true, hasPaper, readings, sampleCount: valid.length };
+}
+
+// Printer status endpoint: returns raw response and hasPaper heuristic
+app.get("/printerStatus", async (req, res) => {
+  try {
+    const typeParam = req.query.type;
+    if (typeParam) {
+      const type = parseInt(typeParam || "1", 10) || 1;
+      const result = await checkPrinterPaper(undefined, undefined, type);
+      return res.json(result);
+    }
+
+    // Default: use a stable majority check on status type=2 (paper-sensor friendly)
+    const stable = await getStablePaperStatus(undefined, 2, 3, 120);
+    res.json(stable);
+  } catch (err) {
+    res.status(500).json({ ok: false, message: "status-check-failed", error: String(err) });
+  }
+});
+
+// Diagnostic endpoint: query status types 1..4 and return raw bytes and heuristics.
+app.get("/printerStatus/all", async (req, res) => {
+  try {
+    const results = {};
+    for (let n = 1; n <= 4; n++) {
+      // keep default device path and timeout
+      const r = await checkPrinterPaper(undefined, 700, n);
+      results[`type${n}`] = r;
+    }
+    res.json({ ok: true, results });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: "status-check-failed", error: String(err) });
+  }
+});
 
 app.post("/pickUpPrint", async (req, res) => {
   try {

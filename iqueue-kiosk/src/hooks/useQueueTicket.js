@@ -21,6 +21,22 @@ export const useQueueTicket = () => {
 
     setPrintStatus("waiting");
 
+    // Check printer paper status before attempting to print
+    try {
+      const statusRes = await fetch(`${PRINTER_SERVER}/printerStatus`);
+      if (statusRes.ok) {
+        const statusJson = await statusRes.json();
+        if (statusJson && statusJson.ok === true && statusJson.hasPaper === false) {
+          // No paper: set UI state and abort printing
+          setPrintStatus("no-paper");
+          return;
+        }
+      }
+    } catch (e) {
+      // If status check fails, fall through and attempt to print (or you may choose to abort)
+      console.warn("Printer status check failed, proceeding to print:", e);
+    }
+
     try {
       //console.log("Submitting transactions:", transactions);
 

@@ -169,6 +169,22 @@ const PickRequestPage = () => {
           </div>
         )}
 
+        {scanStatus === "printer-no-paper" && (
+          <div className="flex flex-col items-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <FaTimesCircle className="text-5xl text-yellow-600 mb-3" />
+            <h2 className="text-lg font-bold text-gray-800 mb-2">Printer Out of Paper</h2>
+            <p className="text-gray-700 text-sm text-center mb-3 w-[300px]">
+              We apologize! The ticket printer is currently out of paper. Please contact a staff member for assistance.
+            </p>
+            <Button
+              className="w-full h-10 font-semibold mt-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+              onClick={handleTryAgain}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
         {/** Only show QR/Input if not in error state and not in success state **/}
         {scanStatus !== "error" && !showInput && (
           <div className="flex flex-col items-center justify-center rounded-lg py-2">
@@ -199,7 +215,7 @@ const PickRequestPage = () => {
           </div>
         )}
 
-        {scanStatus !== "error" && showInput && (
+        {scanStatus !== "error" && scanStatus !== "printer-no-paper" && showInput && (
           <form
             className={`w-64 flex flex-col gap-3 items-center ${
               isVisible ? "-mt-32" : ""

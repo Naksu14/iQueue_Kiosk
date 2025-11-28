@@ -135,6 +135,28 @@ const QueueTicketPage = () => {
               </Button>
             </>
           )}
+
+          {printStatus === "no-paper" && (
+            <>
+              <FaTimesCircle className="text-7xl text-yellow-500 mb-2" />
+              <h2 className="text-xl font-bold text-gray-800 text-center mb-2">
+                Printer Out of Paper
+              </h2>
+              <p className="text-gray-600 text-sm text-center mb-4 w-[260px]">
+                We apologize! The ticket printer is currently out of paper. Please contact a staff member for assistance.
+              </p>
+              <div className="flex gap-2 w-full">
+                <Button
+                  className="flex-1 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 
+                        hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-lg 
+                        shadow-md hover:shadow-lg transition-all duration-300 active:scale-95"
+                  onClick={handleTryAgain}
+                >
+                  Retry
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
