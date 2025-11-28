@@ -38,7 +38,30 @@ export const KeyboardProvider = ({ children }) => {
     }
 
     // Field-specific validation and formatting
-    if (inputName === "grade") {
+    if (inputName === "studentLrn") {
+      // enforce digits only and max length 12
+      value = (value || "").toString().replace(/\D/g, "");
+      if (key === "Clear") {
+        value = "";
+        cursorPos = 0;
+      } else if (key === "Backspace") {
+        if (value.length > 0) {
+          value = value.slice(0, value.length - 1);
+          cursorPos = value.length;
+        }
+      } else if (/[0-9]/.test(key)) {
+        if (value.length < 12) {
+          value = value + key;
+          cursorPos = value.length;
+        } else {
+          // ignore when at max length
+          return;
+        }
+      } else {
+        // ignore non-digit keys for studentLrn
+        return;
+      }
+    } else if (inputName === "grade") {
       if (key === "Clear") {
         value = "";
       } else if (key === "Backspace") {
@@ -104,7 +127,7 @@ export const KeyboardProvider = ({ children }) => {
           cursorPos -= 1;
         }
       } else {
-        value = (value + key).replace(/\s/g, "").toLowerCase();
+        value = (value + key).replace(/\s/g, "");
         cursorPos = value.length;
       }
     } else {

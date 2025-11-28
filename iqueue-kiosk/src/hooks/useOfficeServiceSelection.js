@@ -12,6 +12,7 @@ export const useOfficeServiceSelection = () => {
     showCancelModal,
     setShowCancelModal,
     handleConfirmCancel,
+    removeTransaction,
   } = useTransaction();
 
   const [selectedOfficeRequests, setSelectedOfficeRequests] = useState([]);
@@ -89,6 +90,18 @@ export const useOfficeServiceSelection = () => {
   const isDisabled =
     selectedOfficeRequests.length === 0 && transactions.length === 0;
 
+  // Undo a transaction that has already been added
+  const handleUndoTransaction = (office, request) => {
+    // find the index of the transaction that matches office id and request name
+    const idx = transactions.findIndex(
+      (t) => t.officeId === office.id && t.transactionDetails === request.name
+    );
+
+    if (idx !== -1) {
+      removeTransaction(idx);
+    }
+  };
+
   return {
     offices,
     loading,
@@ -103,5 +116,6 @@ export const useOfficeServiceSelection = () => {
     showCancelModal,
     setShowCancelModal,
     handleConfirmCancel,
+    handleUndoTransaction,
   };
 };

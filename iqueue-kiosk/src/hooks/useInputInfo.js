@@ -10,6 +10,7 @@ export const useInputInfo = () => {
 
   const [formData, setFormData] = useState({
     isVisitor: false,
+    visitorName: "",
     firstName: "",
     lastName: "",
     middleName: "",
@@ -69,8 +70,31 @@ export const useInputInfo = () => {
       // Step 1: Generate transaction code
       const transactionCode = generateTransactionCode();
 
-      // Step 2: Create personal info
-      const finalData = { ...formData, transactionCode };
+      // Step 2: Normalize name fields and create personal info
+      // Convert names and section to Title Case so DB gets consistent casing
+      const toTitleCase = (val) => {
+        if (!val && val !== "") return val;
+        return val
+          .toString()
+          .trim()
+          .replace(/\s+/g, " ")
+          .toLowerCase()
+          .split(" ")
+          .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+          .join(" ");
+      };
+
+      const normalized = {
+        ...formData,
+        firstName: toTitleCase(formData.firstName || ""),
+        lastName: toTitleCase(formData.lastName || ""),
+        middleName: toTitleCase(formData.middleName || ""),
+        section: toTitleCase(formData.section || ""),
+        visitorName: toTitleCase(formData.visitorName || ""),
+        
+      };
+
+      const finalData = { ...normalized, transactionCode };
       const res = await createUserInfo(finalData);
 
       const personalInfoId = res.id;

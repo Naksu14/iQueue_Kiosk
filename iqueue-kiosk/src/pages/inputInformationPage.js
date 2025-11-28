@@ -302,11 +302,11 @@ const InputInformation = () => {
 
       <BackButton onClick={() => navigate(-1)} />
       {showVisitorModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div
-            className="bg-white rounded-lg w-[90%] max-w-md p-6"
-            style={{ paddingBottom: isVisible ? 240 : "" }}
-          >
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 "
+          style={{ paddingBottom: isVisible ? 240 : "" }}
+        >
+          <div className="bg-white rounded-lg w-[90%] max-w-md p-6">
             <h3 className="text-lg font-semibold mb-4">Visitor Name</h3>
             <p className="text-sm text-gray-600 mb-3">
               Please enter the visitor's name.

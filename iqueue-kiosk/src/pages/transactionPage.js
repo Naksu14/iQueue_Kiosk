@@ -73,25 +73,34 @@ const TransactionDetails = () => {
 
                 {/* Right section - Controls */}
                 <div className="flex items-center gap-2">
-                  {t.transactionType !== "Payment" && t.transactionType !== "Inquiry" && (
-                    <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1">
-                      <button
-                        className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
-                        onClick={() => updateCopies(i, t.copies + 1)}
-                      >
-                        +
-                      </button>
-                      <span className="text-xl px-2 font-semibold text-gray-700">
-                        {t.copies}
-                      </span>
-                      <button
-                        className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
-                        onClick={() => updateCopies(i, t.copies - 1)}
-                      >
-                        -
-                      </button>
-                    </div>
-                  )}
+                  {t.transactionType !== "Payment" &&
+                    t.transactionType !== "Inquiry" && (
+                      <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1">
+                        <button
+                          className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
+                          onClick={() => updateCopies(i, t.copies + 1)}
+                        >
+                          +
+                        </button>
+
+                        {/* START: Added Label for Copies */}
+                        <span className="text-sm px-1 font-medium text-gray-500">
+                          Copies:
+                        </span>
+                        {/* END: Added Label for Copies */}
+
+                        <span className="text-xl px-2 font-semibold text-gray-700">
+                          {t.copies}
+                        </span>
+
+                        <button
+                          className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
+                          onClick={() => updateCopies(i, t.copies - 1)}
+                        >
+                          -
+                        </button>
+                      </div>
+                    )}
 
                   <button
                     className="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white p-3 rounded-md"
@@ -137,7 +146,6 @@ const TransactionDetails = () => {
               </button>
             </div>
           </div>
-
         )}
       </div>
 

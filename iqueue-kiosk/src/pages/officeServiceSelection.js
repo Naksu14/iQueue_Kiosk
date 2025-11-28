@@ -23,6 +23,7 @@ const OfficeServiceSelection = () => {
     showCancelModal,
     setShowCancelModal,
     handleConfirmCancel,
+    handleUndoTransaction,
   } = useOfficeServiceSelection();
 
   if (loading) {
@@ -136,18 +137,44 @@ const OfficeServiceSelection = () => {
                           <div className="flex justify-between items-center flex-1">
                             <div>
                               <p className="text-md font-medium">{req.name}</p>
-                              <p className="text-sm italic">{req.type}</p>
+                              {/* Modern change: Change sub-text based on state for immediate feedback */}
+                              <p
+                                className={`text-sm italic ${
+                                  selectedReq ? "text-white" : "text-gray-500"
+                                }`}
+                              >
+                                {selectedReq
+                                  ? "Selected for Transaction"
+                                  : req.type}
+                              </p>
                             </div>
 
                             {alreadyAdded ? (
-                              <p className="text-xs text-green-600 font-semibold">
-                                Added
-                              </p>
-                            ) : selectedReq ? (
-                              <div className="text-xs">Selected</div>
-                            ) : (
+                              // State 1: Already added (or pending) - Use 'Remove' with a modern red pill style
                               <button
-                                className="bg-gray-500 w-15 h-8 text-white text-xs px-2 py-1 rounded-md disabled:opacity-50"
+                                className="bg-white text-red-600 text-md font-semibold px-3 py-2 rounded-md transition hover:bg-red-50 hover:shadow-md"
+                                onClick={() =>
+                                  handleUndoTransaction(currentOffice, req)
+                                }
+                              >
+                                {/* For an item already in the list, 'Remove' is clearer */}
+                                Remove
+                              </button>
+                            ) : selectedReq ? (
+                              // State 2: Currently selected in this office (Green Row) - Use 'Remove' with a modern green pill style
+                              <button
+                                className="bg-white text-[#14AD5A] text-md font-semibold px-3 py-2 rounded-md transition hover:bg-gray-100 hover:shadow-md"
+                                onClick={() =>
+                                  handleRequestSelect(currentOffice, req)
+                                }
+                              >
+                                {/* Since it's currently selected, the action is to 'Remove' it from selection */}
+                                Remove
+                              </button>
+                            ) : (
+                              // State 3: Available to request - Use 'Request' with a modern gray pill style
+                              <button
+                                className="bg-gray-500 text-white text-md font-semibold px-3 py-2 rounded-md disabled:opacity-50 transition hover:bg-gray-600"
                                 disabled={alreadyAdded}
                                 onClick={() =>
                                   handleRequestSelect(
