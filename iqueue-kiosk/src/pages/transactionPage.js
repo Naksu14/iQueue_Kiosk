@@ -75,9 +75,9 @@ const TransactionDetails = () => {
                 <div className="flex items-center gap-2">
                   {t.transactionType !== "Payment" &&
                     t.transactionType !== "Inquiry" && (
-                      <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1">
+                      <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1">
                         <button
-                          className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
+                          className="bg-gray-300 font-bold active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
                           onClick={() => updateCopies(i, t.copies + 1)}
                         >
                           +
@@ -94,7 +94,7 @@ const TransactionDetails = () => {
                         </span>
 
                         <button
-                          className="bg-gray-300 active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
+                          className="bg-gray-300 font-bold active:bg-gray-400 text-lg w-10 h-10 rounded-md shadow-sm"
                           onClick={() => updateCopies(i, t.copies - 1)}
                         >
                           -
