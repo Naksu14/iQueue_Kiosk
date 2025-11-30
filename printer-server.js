@@ -257,6 +257,7 @@ app.post("/pickUpPrint", async (req, res) => {
       LF,
       ESC_ALIGN_LEFT,
       afterBuf,
+      LF,
     ]);
 
     // Write binary ticket and send to printer
@@ -323,6 +324,7 @@ app.post("/printInquiryTicket", async (req, res) => {
       LF,
       ESC_ALIGN_LEFT,
       afterBuf,
+      LF,
     ]);
 
     // Write binary ticket and send to printer
@@ -409,6 +411,7 @@ app.post("/print", async (req, res) => {
       qrBuf,
       ESC_ALIGN_LEFT,
       afterBuf,
+      LF,
     ]);
 
     // Temporary file for printing (binary)
