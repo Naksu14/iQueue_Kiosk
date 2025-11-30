@@ -1,9 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getTransactionByCode,
-  createUserTransaction,
-} from "../services/dbServices/createTransactionService";
+import { getTransactionByCode } from "../services/dbServices/createTransactionService";
 import {
   createQueueNumber,
   updateQueueNoStatus,
@@ -447,16 +444,7 @@ export const useNewOnlineScanningHooks = () => {
     }
 
     try {
-      //console.log("Submitting transactions:", transactions);
-
-      // Send transactions to backend (use scanned transactions when present)
-      const transactionArray = await createUserTransaction(txToPrint);
-      // console.log(" Transactions created:", res);
-
-      //  Get queueNumberId from backend or localStorage (fallback)
-      const queueNumberId =
-        transactionArray?.queueNumberId ||
-        localStorage.getItem("queueNumberId");
+      const queueNumberId = localStorage.getItem("queueNumberId");
 
       // Save again just to be sure (prevents null issues later)
       localStorage.setItem("queueNumberId", queueNumberId);
@@ -468,7 +456,7 @@ export const useNewOnlineScanningHooks = () => {
       const payload = {
         queueNumber,
         transactionCode,
-        transactionArray,
+        txToPrint,
       };
 
       const response = await fetch(`${PRINTER_SERVER}/print`, {
