@@ -26,11 +26,7 @@ export const useQueueTicket = () => {
       const statusRes = await fetch(`${PRINTER_SERVER}/printerStatus`);
       if (statusRes.ok) {
         const statusJson = await statusRes.json();
-        if (
-          statusJson &&
-          statusJson.ok === true &&
-          statusJson.hasPaper === false
-        ) {
+        if (statusJson && statusJson.ok === true && statusJson.hasPaper === false) {
           // No paper: set UI state and abort printing
           setPrintStatus("no-paper");
           return;

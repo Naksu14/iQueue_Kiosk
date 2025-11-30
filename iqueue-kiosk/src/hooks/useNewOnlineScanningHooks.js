@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getTransactionByCode } from "../services/dbServices/createTransactionService";
+import {
+  getTransactionByCode} from "../services/dbServices/createTransactionService";
 import {
   createQueueNumber,
   updateQueueNoStatus,
@@ -409,18 +410,18 @@ export const useNewOnlineScanningHooks = () => {
 
   const handlePrint = async () => {
     // Prefer scanned transaction objects when available, otherwise use global transactions
-    const txToPrint =
+    const transactionArray =
       transactionReqDetails &&
       transactionReqDetails.transactionObjects &&
       transactionReqDetails.transactionObjects.length > 0
         ? transactionReqDetails.transactionObjects
         : transactions;
 
-    if (!txToPrint || txToPrint.length === 0) {
+    if (!transactionArray || transactionArray.length === 0) {
       console.warn(" No transactions to print.");
       return;
     }
-
+    console.log(" Printing transactions:", transactionArray);
     setPrintStatus("waiting");
 
     // Check printer paper status before attempting to print
@@ -444,6 +445,7 @@ export const useNewOnlineScanningHooks = () => {
     }
 
     try {
+
       const queueNumberId = localStorage.getItem("queueNumberId");
 
       // Save again just to be sure (prevents null issues later)
@@ -453,19 +455,12 @@ export const useNewOnlineScanningHooks = () => {
       const transactionCode = localStorage.getItem("transactionCode");
       const queueNumber = localStorage.getItem("queueNumber");
 
-      // Map `txToPrint` into `transactionArray` expected by the printer server.
-      const transactionArray = txToPrint.map((t) => ({
-        transactionDetails:
-          t.transactionDetails || t.transactionDetailsArr || "",
-        copies: t.copies || t.qty || 1,
-        fee: typeof t.fee === "number" ? t.fee : 0,
-      }));
-
       const payload = {
         queueNumber,
         transactionCode,
         transactionArray,
       };
+      console.log(" Print payload:", payload);
 
       const response = await fetch(`${PRINTER_SERVER}/print`, {
         method: "POST",
