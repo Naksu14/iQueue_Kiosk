@@ -67,7 +67,7 @@ const InputInformation = () => {
           className="bg-white w-full p-6 rounded-md shadow-lg text-left"
         >
           <div className="flex justify-center -mt-2">
-            <SubHeader text="Step 4: Help us identify and process your request faster" />
+            <SubHeader text="Help us identify and process your request faster" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">

@@ -24,7 +24,7 @@ const WalkinSelectTransaction = () => {
       <SubHeader
         text={
           <>
-            Step 1: Please select{" "}
+            Please select{" "}
             <span className="text-blue-500">Walk-in Request</span> Options to
            start your transaction.
           </>

@@ -249,7 +249,7 @@ app.post("/pickUpPrint", async (req, res) => {
     // Define the Cut Command (GS V 0)
     const GS_CUT = Buffer.from([0x1d, 0x56, 0x00]);
     // Define multiple Line Feeds for padding at the bottom
-    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]); // 6 LFs
+    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a]); // 6 LFs
 
     const finalBuf = Buffer.concat([
       beforeBuf,
@@ -323,7 +323,7 @@ app.post("/printInquiryTicket", async (req, res) => {
     // Define the Cut Command (GS V 0)
     const GS_CUT = Buffer.from([0x1d, 0x56, 0x00]);
     // Define multiple Line Feeds for padding at the bottom
-    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]); // 6 LFs
+    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a]); // 6 LFs
 
     const finalBuf = Buffer.concat([
       beforeBuf,
@@ -415,7 +415,7 @@ app.post("/print", async (req, res) => {
     // Define the Cut Command (GS V 0)
     const GS_CUT = Buffer.from([0x1d, 0x56, 0x00]);
     // Define multiple Line Feeds for padding at the bottom
-    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]); // 6 LFs
+    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a]); // 3 LFs
     const finalBuf = Buffer.concat([
       beforeBuf,
       // Center and print the enlarged queue number

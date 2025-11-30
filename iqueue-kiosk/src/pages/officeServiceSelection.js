@@ -44,7 +44,7 @@ const OfficeServiceSelection = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <SubHeader text="Step 2: Please select your destination offices and requests." />
+      <SubHeader text="Please select your destination offices and requests." />
 
       <div className="flex gap-2 w-full justify-center">
         {/* Left Side Office List */}

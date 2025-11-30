@@ -1,5 +1,5 @@
 import React from "react";
-import { FaQrcode, FaTimesCircle } from "react-icons/fa";
+import { FaQrcode, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import Button from "../components/button/button";
 import IconContainer from "../components/layout/iconContainer";
@@ -25,6 +25,10 @@ const ScanningNewQrPage = () => {
     handleTryAgain,
     showInput,
     setShowInput,
+    // Printing helpers used by scanning pages
+    handlePrint,
+    isPrinting,
+    printStatus,
   } = useNewOnlineScanningHooks();
 
   // --- SUCCESS STATE ---
@@ -76,107 +80,149 @@ const ScanningNewQrPage = () => {
         <header className="text-center w-full max-w-md">
           <SubHeader text="Confirm Your Transaction" className="font-bold" />
         </header>
-        <div className="flex-1 p-6 bg-white shadow-md rounded-lg text-left border border-gray-100 transition-all duration-200 hover:shadow-lg">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Transaction Details
-            </h2>
-            <span className="text-sm text-gray-500">
-              {new Date().toLocaleDateString()}
-            </span>
-          </div>
-          {augmentedList.map((item, idx) => {
-            const visibleDetails = (item.transactionObjects || [])
-              .filter((t) => t.paymentStatus === "Unpaid")
-              .map((t) => t.transactionDetails)
-              .filter(Boolean);
-            return (
-              <ul
-                key={item.id + "-" + item.transactionCode + "-" + idx}
-                className="space-y-2 text-gray-700 mb-2"
-              >
-                <li>
-                  <span className="font-medium text-gray-800">
-                    Student Name:
-                  </span>{" "}
-                  <span className="text-gray-600">{item.fullName}</span>
-                </li>
-                <li>
-                  <span className="font-medium text-gray-800">Go to:</span>{" "}
-                  <span className="text-gray-600">{item.displayOffice}</span>
-                </li>
-                <li className="flex flex-col">
-                  <span className="font-medium text-gray-800">
-                    Request Document:
-                  </span>
-                  <span className="text-gray-600">
-                    {visibleDetails && visibleDetails.length > 0 ? (
-                      <ul className="list-disc list-inside space-y-1">
-                        {visibleDetails.map((detail, index) => (
-                          <li key={index}>{detail}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      "No details"
-                    )}
-                  </span>
-                </li>
-
-                <li className="border-t pt-3 mt-3 text-gray-600">
-                  <span className="font-medium text-gray-800">
-                    Instructions:
-                  </span>{" "}
-                  Present your valid ID & Student ID
-                </li>
-                {typeof item.estimatedWait === "number" &&
-                item.estimatedWait > 0 ? (
-                  <li className="flex flex-wrap justify-center items-center gap-2">
-                    {item.countWaiting > 0 && (
-                      <span className="text-gray-500">
-                        {item.countWaiting} Queue,
-                      </span>
-                    )}
+        <p className="text-gray-600 text-sm w-[500px] mx-auto">
+          Present your ticket in transaction office, Your number is delayed by 2
+          minutes to allow time for you to arrive at the transaction office.
+        </p>
+        <div className="flex gap-10 p-6 bg-white shadow-md rounded-lg text-left border border-gray-100 transition-all duration-200 hover:shadow-lg">
+          <div className="border-r pr-4 border-green-200">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Transaction Details
+              </h2>
+              <span className="text-sm text-gray-500">
+                {new Date().toLocaleDateString()}
+              </span>
+            </div>
+            {augmentedList.map((item, idx) => {
+              const visibleDetails = (item.transactionObjects || [])
+                .filter((t) => t.paymentStatus === "Unpaid")
+                .map((t) => t.transactionDetails)
+                .filter(Boolean);
+              return (
+                <ul
+                  key={item.id + "-" + item.transactionCode + "-" + idx}
+                  className="space-y-2 text-gray-700 mb-2"
+                >
+                  <li>
                     <span className="font-medium text-gray-800">
-                      Estimated Wait:
+                      Student Name:
                     </span>{" "}
-                    <span className="text-orange-500 font-semibold">
-                      {(() => {
-                        const sec = Math.round(item.estimatedWait);
-                        if (sec < 60) return ` ${sec}s`;
-                        const min = Math.floor(sec / 60);
-                        if (min < 60) return ` ${min} min`;
-                        const hr = Math.floor(min / 60);
-                        const remMin = min % 60;
-                        return `${hr} hr${hr > 1 ? "s" : ""}${
-                          remMin > 0 ? ` ${remMin} min` : ""
-                        }`;
-                      })()}
+                    <span className="text-gray-600">{item.fullName}</span>
+                  </li>
+                  <li>
+                    <span className="font-medium text-gray-800">Go to:</span>{" "}
+                    <span className="text-gray-600">{item.displayOffice}</span>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="font-medium text-gray-800">
+                      Request Document:
+                    </span>
+                    <span className="text-gray-600">
+                      {visibleDetails && visibleDetails.length > 0 ? (
+                        <ul className="list-disc list-inside space-y-1">
+                          {visibleDetails.map((detail, index) => (
+                            <li key={index}>{detail}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        "No details"
+                      )}
                     </span>
                   </li>
-                ) : (
-                  <li className="text-center">
-                    <span className="text-gray-400 font-semibold">
-                      No Queue Waiting
-                    </span>
+
+                  <li className="border-t pt-3 mt-3 text-gray-600">
+                    <span className="font-medium text-gray-800">
+                      Instructions:
+                    </span>{" "}
+                    Present your valid ID & Student ID
                   </li>
-                )}
-              </ul>
-            );
-          })}
-          <Button
-            className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow hover:shadow-md hover:opacity-90 transition duration-200 flex items-center justify-center gap-2"
-            onClick={handleDisplayQueueInMobile}
-            disabled={isDisplaying}
-          >
-            {isDisplaying ? (
-              <>
-                <ImSpinner2 className="animate-spin text-2xl text-white" />
-                <span>Getting Queue Number...</span>
-              </>
-            ) : (
-              "Get Queue Number"
-            )}
-          </Button>
+                  {typeof item.estimatedWait === "number" &&
+                  item.estimatedWait > 0 ? (
+                    <li className="flex flex-wrap justify-center items-center gap-2">
+                      {item.countWaiting > 0 && (
+                        <span className="text-gray-500">
+                          {item.countWaiting} Queue,
+                        </span>
+                      )}
+                      <span className="font-medium text-gray-800">
+                        Estimated Wait:
+                      </span>{" "}
+                      <span className="text-orange-500 font-semibold">
+                        {(() => {
+                          const sec = Math.round(item.estimatedWait);
+                          if (sec < 60) return ` ${sec}s`;
+                          const min = Math.floor(sec / 60);
+                          if (min < 60) return ` ${min} min`;
+                          const hr = Math.floor(min / 60);
+                          const remMin = min % 60;
+                          return `${hr} hr${hr > 1 ? "s" : ""}${
+                            remMin > 0 ? ` ${remMin} min` : ""
+                          }`;
+                        })()}
+                      </span>
+                    </li>
+                  ) : (
+                    <li className="text-center">
+                      <span className="text-gray-400 font-semibold">
+                        No Queue Waiting
+                      </span>
+                    </li>
+                  )}
+                </ul>
+              );
+            })}
+          </div>
+          {/* Button Container for Spacing */}
+          <div className="space-y-3 flex flex-col justify-center items-center">
+            {/* Primary Button: Get Queue Number (Mobile) */}
+            <span className="text-green-600 font-semibold text-center">
+              Mobile Queue Number
+            </span>
+            <Button
+              className="w-full h-20 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-2xl font-semibold rounded-lg shadow hover:shadow-md hover:opacity-90 transition duration-200 flex items-center justify-center gap-2"
+              onClick={handleDisplayQueueInMobile}
+              disabled={isDisplaying}
+            >
+              {isDisplaying ? (
+                <>
+                  <ImSpinner2 className="animate-spin text-2xl text-white" />
+                  <span>Getting Queue Number...</span>
+                </>
+              ) : (
+                "Get Queue Number"
+              )}
+            </Button>
+            <span className="text-xs text-gray-500 text-center">
+              *If you prefer a physical ticket, click "Print Ticket".*
+            </span>
+
+            {/* Secondary Button: Print Ticket (Alternative) */}
+            {/* NOTE: You will need to define a new handler function, e.g., handlePrintTicket */}
+            <Button
+              className="px-4 h-10 border bg-gray-100 text-gray-700 font-semibold rounded-lg shadow-none hover:bg-gray-200 flex items-center justify-center gap-2"
+              // Assuming you have a handler function named handlePrintTicket
+              onClick={handlePrint}
+              disabled={isPrinting} // Assuming you have a state for printing status
+            >
+              {/* Add a printer icon for visual clarity */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h4m4-4H9m7 0a3 3 0 10-6 0h6z"
+                />
+              </svg>
+              {isPrinting ? "Printing..." : "Print Ticket"}
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -289,6 +335,63 @@ const ScanningNewQrPage = () => {
               Submit Code
             </Button>
           </form>
+        )}
+        {printStatus === "waiting" && (
+          <>
+            <ImSpinner2 className="animate-spin text-7xl text-gray-400 my-6" />
+            <span className="text-gray-600 text-xl">Printing ticket...</span>
+          </>
+        )}
+
+        {printStatus === "success" && (
+          <>
+            <FaCheckCircle className="text-7xl text-green-500 my-6" />
+            <span className="text-green-600 text-xl font-semibold">
+              Printed Successfully!
+            </span>
+          </>
+        )}
+
+        {printStatus === "error" && (
+          <>
+            <FaTimesCircle className="text-7xl text-red-500 mb-2" />
+            <span className="text-red-600 font-normal text-xl text-center mb-2">
+              Ticket printing failed.
+              <br />
+              Please try again.
+            </span>
+            <Button
+              className="w-full py-3 rounded-full bg-gradient-to-r from-red-500 to-pink-500 
+                                hover:from-red-600 hover:to-pink-600 text-white font-semibold text-lg 
+                                shadow-md hover:shadow-lg transition-all duration-300 active:scale-95"
+              onClick={handleTryAgain}
+            >
+              Try Again
+            </Button>
+          </>
+        )}
+
+        {printStatus === "no-paper" && (
+          <>
+            <FaTimesCircle className="text-7xl text-yellow-500 mb-2" />
+            <h2 className="text-xl font-bold text-gray-800 text-center mb-2">
+              Printer Out of Paper
+            </h2>
+            <p className="text-gray-600 text-sm text-center mb-4 w-[260px]">
+              We apologize! The ticket printer is currently out of paper. Please
+              contact a staff member for assistance.
+            </p>
+            <div className="flex gap-2 w-full">
+              <Button
+                className="flex-1 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 
+                                hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-lg 
+                                shadow-md hover:shadow-lg transition-all duration-300 active:scale-95"
+                onClick={handleTryAgain}
+              >
+                Retry
+              </Button>
+            </div>
+          </>
         )}
       </div>
 

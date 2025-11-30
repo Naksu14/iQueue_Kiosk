@@ -16,6 +16,11 @@ export const useOnlineScanningHooks = () => {
   const [scanStatus, setScanStatus] = useState("idle");
   const [transactionReqDetails, setTransactionReqDetails] = useState(null);
   const [isDisplaying, setIsDisplaying] = useState(false);
+  const [printStatus, setPrintStatus] = useState("idle");
+  const isPrinting = printStatus === "waiting" || printStatus === "printing";
+
+  const PRINTER_SERVER =
+    process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
 
   // Scanner server (node process on the Pi that reads the USB scanner stdin)
   const SCANNER_SERVER =
@@ -330,6 +335,161 @@ export const useOnlineScanningHooks = () => {
     // Hide the input field if we were previously showing an error
     setShowInput(false);
   };
+  const handleTryAgainPrint = () => setPrintStatus("idle");
+
+  const handlePickupPrint = async () => {
+    // Prevent duplicate printing while a print is already in progress
+    if (isPrinting) {
+      console.warn("Print ignored: already printing.");
+      return;
+    }
+    // mark printing state
+    setPrintStatus("waiting");
+
+    // Determine the details source: prefer transactionReqDetails (scan),
+    // otherwise try to derive from manual `code` by fetching the transaction.
+    let details = transactionReqDetails;
+    if (!details) {
+      if (!code) {
+        console.warn("No scanned or manual code available for pickup print.");
+        setPrintStatus("idle");
+        return;
+      }
+
+      try {
+        const txData = await getTransactionByCode(code);
+        const txs = txData.transactions;
+        if (txs && txs.length > 0) {
+          const filtered = txs.filter((transaction) => {
+            const online = transaction.personalInfo.type;
+            if (online === "walkin") return false;
+            const steps = transaction.steps;
+            if (!steps || steps.length === 0) return false;
+            const lastStep = steps[steps.length - 1];
+            return lastStep.stepNumber === 3;
+          });
+          if (filtered && filtered.length > 0) {
+            const first = filtered[0];
+            details = {
+              id: first.personalInfo.id,
+              transactionCode: first.personalInfo.transactionCode,
+              fullName:
+                first.personalInfo.fullName ||
+                `${first.personalInfo.firstName} ${first.personalInfo.lastName}`,
+              officeId: first.office?.office_id,
+              officeName: first.office?.office_name,
+              transactionDetailsArr: filtered.map((t) => t.transactionDetails),
+            };
+            setTransactionReqDetails(details);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch transaction for manual code:", err);
+      }
+    }
+
+    if (!details) {
+      console.warn("No transaction details available for pickup print.");
+      setPrintStatus("idle");
+      return;
+    }
+
+    // Check printer status before printing pickup slip
+    try {
+      const statusRes = await fetch(`${PRINTER_SERVER}/printerStatus`);
+      if (statusRes.ok) {
+        const statusJson = await statusRes.json();
+        if (
+          statusJson &&
+          statusJson.ok === true &&
+          statusJson.hasPaper === false
+        ) {
+          console.warn("Printer reports no paper — aborting pickup print.");
+          setPrintStatus("idle");
+          // Optionally set a user-visible error state; here we set scanStatus to reflect the failure
+          setScanStatus("printer-no-paper");
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Printer status check failed, proceeding to print:", err);
+    }
+    const queuePayload = {
+      office: transactionReqDetails.officeName,
+      officeInvolved: [transactionReqDetails.officeName],
+      personalInfoId: transactionReqDetails.id,
+      queueType: "Walk-in",
+      pickUp: true,
+    };
+    try {
+      const queueNumberId = await createQueueNumber(queuePayload);
+      localStorage.setItem("queueNumberId", queueNumberId.id);
+      localStorage.setItem("queueNumber", queueNumberId.queueNumber);
+    } catch (error) {
+      console.error(" Error creating queue number:", error);
+      // allow future prints and abort if we couldn't create a queue number
+      setPrintStatus("idle");
+      return;
+    }
+
+    const queueNumber = localStorage.getItem("queueNumber");
+
+    const printPayload = {
+      officeName: details.officeName,
+      transactionDetails: Array.isArray(details.transactionDetailsArr)
+        ? details.transactionDetailsArr.join("; ")
+        : details.transactionDetailsArr || "",
+      transactionCode: details.transactionCode,
+      queueNumber: queueNumber,
+    };
+
+    const response = await fetch(`${PRINTER_SERVER}/pickUpPrint`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(printPayload),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Print server responded with error:", text);
+      // allow future prints
+      setPrintStatus("error");
+      throw new Error("Printing failed");
+    }
+    // Keep isPrinting=true until we navigate away (prevents duplicate clicks/spam).
+    // We await the simulated delays so the UI can't trigger another print immediately.
+    try {
+      // wait simulated print delay
+      await new Promise((res) => setTimeout(res, 1003));
+
+      const queueNumberId = localStorage.getItem("queueNumberId");
+
+      // additional delay before navigation
+      await new Promise((res) => setTimeout(res, 3000));
+
+      navigate("/");
+
+      // schedule background status update after 30s (do not block user)
+      setTimeout(async () => {
+        if (!queueNumberId) {
+          console.warn(" No valid queue ID found for status update!");
+          return;
+        }
+        try {
+          await updateQueueNoStatus(queueNumberId, "waiting");
+        } catch (error) {
+          console.error(" Failed to update queue status:", error);
+        }
+      }, 30000);
+    } catch (error) {
+      console.error("Error during post-print flow:", error);
+      setScanStatus("error");
+      setPrintStatus("error");
+    } finally {
+      // small cooldown to prevent accidental re-clicks after navigation
+      setTimeout(() => setPrintStatus("idle"), 1000);
+    }
+  };
   return {
     navigate,
     scanStatus,
@@ -345,5 +505,9 @@ export const useOnlineScanningHooks = () => {
     handleTryAgain,
     showInput,
     setShowInput,
+    // Printing helpers
+    handlePickupPrint,
+    isPrinting,
+    handleTryAgainPrint,
   };
 };
