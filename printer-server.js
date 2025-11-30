@@ -209,7 +209,7 @@ app.post("/pickUpPrint", async (req, res) => {
 
     // Build a pickup ticket similar to /print but tailored for pickup
     const header =
-      `\n================================\n` +
+      `\n\n================================\n` +
       `  Jesus Good Shepherd School\n` +
       `         Pick-up Slip\n` +
       `--------- iQueue Ticket --------\n` +
@@ -246,6 +246,10 @@ app.post("/pickUpPrint", async (req, res) => {
     const beforeBuf = Buffer.from(header + infoLines, "utf8");
     const queueBuf = Buffer.from(`${queueNumber}\n`, "utf8");
     const afterBuf = Buffer.from(txLines + footer, "utf8");
+    // Define the Cut Command (GS V 0)
+    const GS_CUT = Buffer.from([0x1d, 0x56, 0x00]);
+    // Define multiple Line Feeds for padding at the bottom
+    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]); // 6 LFs
 
     const finalBuf = Buffer.concat([
       beforeBuf,
@@ -257,7 +261,9 @@ app.post("/pickUpPrint", async (req, res) => {
       LF,
       ESC_ALIGN_LEFT,
       afterBuf,
-      LF,
+      // *** NEW ENDING SEQUENCE ***
+      LF_PADDING,
+      GS_CUT,
     ]);
 
     // Write binary ticket and send to printer
@@ -288,7 +294,7 @@ app.post("/printInquiryTicket", async (req, res) => {
 
     // Build a pickup ticket similar to /print but tailored for pickup
     const header =
-      `================================\n` +
+      `\n\n================================\n` +
       `  Jesus Good Shepherd School\n` +
       `        Inquiry Queue Slip\n` +
       `--------- iQueue Ticket --------\n` +
@@ -314,6 +320,11 @@ app.post("/printInquiryTicket", async (req, res) => {
     const queueBuf = Buffer.from(`${queueNumber}\n`, "utf8");
     const afterBuf = Buffer.from(footer, "utf8");
 
+    // Define the Cut Command (GS V 0)
+    const GS_CUT = Buffer.from([0x1d, 0x56, 0x00]);
+    // Define multiple Line Feeds for padding at the bottom
+    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]); // 6 LFs
+
     const finalBuf = Buffer.concat([
       beforeBuf,
       // center & enlarge queue number
@@ -324,7 +335,9 @@ app.post("/printInquiryTicket", async (req, res) => {
       LF,
       ESC_ALIGN_LEFT,
       afterBuf,
-      LF,
+      // *** NEW ENDING SEQUENCE ***
+      LF_PADDING,
+      GS_CUT,
     ]);
 
     // Write binary ticket and send to printer
@@ -352,7 +365,7 @@ app.post("/print", async (req, res) => {
 
     // Build ticket header up to the 'Queue No:' label. We'll print the queue number enlarged
     const header =
-      `================================\n` +
+      `\n\n================================\n` +
       `  Jesus Good Shepherd School\n` +
       `      Transaction Slip\n` +
       `--------- iQueue Ticket --------\n` +
@@ -399,6 +412,10 @@ app.post("/print", async (req, res) => {
 
     // Center the QR block using ESC a 1, then reset alignment to left
     const LF = Buffer.from([0x0a]);
+    // Define the Cut Command (GS V 0)
+    const GS_CUT = Buffer.from([0x1d, 0x56, 0x00]);
+    // Define multiple Line Feeds for padding at the bottom
+    const LF_PADDING = Buffer.from([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]); // 6 LFs
     const finalBuf = Buffer.concat([
       beforeBuf,
       // Center and print the enlarged queue number
@@ -411,7 +428,9 @@ app.post("/print", async (req, res) => {
       qrBuf,
       ESC_ALIGN_LEFT,
       afterBuf,
-      LF,
+      // *** NEW ENDING SEQUENCE ***
+      LF_PADDING,
+      GS_CUT,
     ]);
 
     // Temporary file for printing (binary)
