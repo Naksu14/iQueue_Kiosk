@@ -453,10 +453,18 @@ export const useNewOnlineScanningHooks = () => {
       const transactionCode = localStorage.getItem("transactionCode");
       const queueNumber = localStorage.getItem("queueNumber");
 
+      // Map `txToPrint` into `transactionArray` expected by the printer server.
+      const transactionArray = txToPrint.map((t) => ({
+        transactionDetails:
+          t.transactionDetails || t.transactionDetailsArr || "",
+        copies: t.copies || t.qty || 1,
+        fee: typeof t.fee === "number" ? t.fee : 0,
+      }));
+
       const payload = {
         queueNumber,
         transactionCode,
-        txToPrint,
+        transactionArray,
       };
 
       const response = await fetch(`${PRINTER_SERVER}/print`, {
