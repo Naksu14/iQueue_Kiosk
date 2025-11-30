@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserInfo } from "../services/dbServices/createTransactionService";
 import { createQueueNumber } from "../services/dbServices/addQueueNumber";
@@ -8,21 +8,55 @@ export const useInputInfo = () => {
   const { attachPersonalInfoIdToAllTransactions } = useTransaction();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    isVisitor: false,
-    visitorName: "",
-    firstName: "",
-    lastName: "",
-    middleName: "",
-    studentLrn: "",
-    isAlumni: false,
-    grade: "",
-    section: "",
-    schoolYear: "",
-    email: "",
-    transactionCode: "",
-    verifiedBy: null,
+  const [formData, setFormData] = useState(() => {
+    // Load any temporarily saved form data so users who navigate back see their inputs
+    try {
+      const saved = localStorage.getItem("tempFormData");
+      return saved
+        ? JSON.parse(saved)
+        : {
+            isVisitor: false,
+            visitorName: "",
+            firstName: "",
+            lastName: "",
+            middleName: "",
+            studentLrn: "",
+            isAlumni: false,
+            grade: "",
+            section: "",
+            schoolYear: "",
+            email: "",
+            transactionCode: "",
+            verifiedBy: null,
+          };
+    } catch (e) {
+      return {
+        isVisitor: false,
+        visitorName: "",
+        firstName: "",
+        lastName: "",
+        middleName: "",
+        studentLrn: "",
+        isAlumni: false,
+        grade: "",
+        section: "",
+        schoolYear: "",
+        email: "",
+        transactionCode: "",
+        verifiedBy: null,
+      };
+    }
   });
+
+  // Persist temporary form data whenever it changes so users can go back and resume
+  // We intentionally persist everything except transient flags if needed.
+  useEffect(() => {
+    try {
+      localStorage.setItem("tempFormData", JSON.stringify(formData));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [formData]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
@@ -91,7 +125,6 @@ export const useInputInfo = () => {
         middleName: toTitleCase(formData.middleName || ""),
         section: toTitleCase(formData.section || ""),
         visitorName: toTitleCase(formData.visitorName || ""),
-        
       };
 
       const finalData = { ...normalized, transactionCode };
@@ -159,7 +192,12 @@ export const useInputInfo = () => {
       //   queueRes.id
       // );
 
-      // Step 5: Navigate to ticket page
+      // Step 5: Clear any temporary saved form data on successful submit
+      try {
+        localStorage.removeItem("tempFormData");
+      } catch (e) {}
+
+      // Step 6: Navigate to ticket page
       navigate("/QueueTicketPage");
     } catch (error) {
       console.error(" Failed to save info:", error);

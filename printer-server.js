@@ -77,7 +77,11 @@ app.get("/ping", (req, res) => res.json({ ok: true }));
 // and a conservative heuristic `hasPaper` boolean. If the device doesn't
 // respond the endpoint reports no-response.
 // Check printer status using DLE EOT n (0x10 0x04 n). `statusType` is the n value.
-async function checkPrinterPaper(devicePath = "/dev/usb/lp0", timeoutMs = 700, statusType = 1) {
+async function checkPrinterPaper(
+  devicePath = "/dev/usb/lp0",
+  timeoutMs = 700,
+  statusType = 1
+) {
   const req = Buffer.from([0x10, 0x04, statusType]); // DLE EOT n
   try {
     const fd = await fsp.open(devicePath, "r+");
@@ -86,12 +90,16 @@ async function checkPrinterPaper(devicePath = "/dev/usb/lp0", timeoutMs = 700, s
       await fd.write(req);
 
       // Attempt to read a single byte with a timeout
-      const readPromise = fd.read(Buffer.alloc(1), 0, 1, null).then(({ bytesRead, buffer }) => {
-        if (bytesRead === 1) return buffer[0];
-        return null;
-      });
+      const readPromise = fd
+        .read(Buffer.alloc(1), 0, 1, null)
+        .then(({ bytesRead, buffer }) => {
+          if (bytesRead === 1) return buffer[0];
+          return null;
+        });
 
-      const timeout = new Promise((resolve) => setTimeout(() => resolve(null), timeoutMs));
+      const timeout = new Promise((resolve) =>
+        setTimeout(() => resolve(null), timeoutMs)
+      );
       const resByte = await Promise.race([readPromise, timeout]);
 
       await fd.close();
@@ -120,7 +128,12 @@ async function checkPrinterPaper(devicePath = "/dev/usb/lp0", timeoutMs = 700, s
 }
 
 // Perform multiple quick reads and return a stable majority result.
-async function getStablePaperStatus(devicePath = "/dev/usb/lp0", statusType = 2, attempts = 3, delayMs = 120) {
+async function getStablePaperStatus(
+  devicePath = "/dev/usb/lp0",
+  statusType = 2,
+  attempts = 3,
+  delayMs = 120
+) {
   const readings = [];
   for (let i = 0; i < attempts; i++) {
     const r = await checkPrinterPaper(devicePath, 500, statusType);
@@ -136,7 +149,8 @@ async function getStablePaperStatus(devicePath = "/dev/usb/lp0", statusType = 2,
 
   // Count only non-null readings
   const valid = readings.filter((v) => v === 0 || v === 1);
-  if (valid.length === 0) return { ok: false, message: "no-valid-responses", readings };
+  if (valid.length === 0)
+    return { ok: false, message: "no-valid-responses", readings };
 
   const ones = valid.filter((v) => v === 1).length;
   const zeros = valid.length - ones;
@@ -158,7 +172,9 @@ app.get("/printerStatus", async (req, res) => {
     const stable = await getStablePaperStatus(undefined, 2, 3, 120);
     res.json(stable);
   } catch (err) {
-    res.status(500).json({ ok: false, message: "status-check-failed", error: String(err) });
+    res
+      .status(500)
+      .json({ ok: false, message: "status-check-failed", error: String(err) });
   }
 });
 
@@ -173,7 +189,9 @@ app.get("/printerStatus/all", async (req, res) => {
     }
     res.json({ ok: true, results });
   } catch (err) {
-    res.status(500).json({ ok: false, message: "status-check-failed", error: String(err) });
+    res
+      .status(500)
+      .json({ ok: false, message: "status-check-failed", error: String(err) });
   }
 });
 
@@ -193,17 +211,17 @@ app.post("/pickUpPrint", async (req, res) => {
     const header =
       `\n================================\n` +
       `  Jesus Good Shepherd School\n` +
-      `        Pick-up Slip\n` +
+      `         Pick-up Slip\n` +
       `--------- iQueue Ticket --------\n` +
       `Date:${new Date().toLocaleDateString()} Time:${new Date().toLocaleTimeString()}\n`;
 
-    const infoLines = `Please proceed to the: ${officeName || ""}\n\n`;
+    const infoLines = `Please proceed to the:\n ${officeName || ""}\n`;
 
     // Normalize transactionDetails to an array so clients may send either an
     // array of strings or a single string (joined by newlines or semicolons).
     let txArray = [];
     if (Array.isArray(transactionDetails)) txArray = transactionDetails;
-    else if (typeof transactionDetails === 'string') {
+    else if (typeof transactionDetails === "string") {
       txArray = transactionDetails
         .split(/\r?\n|\s*;\s*/)
         .map((s) => s.trim())
@@ -216,7 +234,7 @@ app.post("/pickUpPrint", async (req, res) => {
       ` T-Code: ${transactionCode}\n` +
       `--------------------------------\n` +
       `   Thank you for using iQueue!\n` +
-      `================================\n\n`;
+      `================================`;
 
     // ESC/POS alignment and sizing
     const GS_SIZE_2X = Buffer.from([0x1d, 0x21, 0x11]);
@@ -256,6 +274,72 @@ app.post("/pickUpPrint", async (req, res) => {
   }
 });
 
+app.post("/printInquiryTicket", async (req, res) => {
+  try {
+    const { officeName, transactionCode, queueNumber } = req.body || {};
+
+    if (!transactionCode || !queueNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: queueNumber or transactionCode",
+      });
+    }
+
+    // Build a pickup ticket similar to /print but tailored for pickup
+    const header =
+      `================================\n` +
+      `  Jesus Good Shepherd School\n` +
+      `        Inquiry Queue Slip\n` +
+      `--------- iQueue Ticket --------\n` +
+      `Date:${new Date().toLocaleDateString()} Time:${new Date().toLocaleTimeString()}\n`;
+
+    const infoLines = `Please proceed to the:\n ${officeName || ""}\n`;
+
+    const footer =
+      `--------------------------------\n` +
+      ` T-Code: ${transactionCode}\n` +
+      `--------------------------------\n` +
+      `   Thank you for using iQueue!\n` +
+      `================================`;
+
+    // ESC/POS alignment and sizing
+    const GS_SIZE_2X = Buffer.from([0x1d, 0x21, 0x11]);
+    const GS_SIZE_NORMAL = Buffer.from([0x1d, 0x21, 0x00]);
+    const ESC_ALIGN_CENTER = Buffer.from([0x1b, 0x61, 0x01]);
+    const ESC_ALIGN_LEFT = Buffer.from([0x1b, 0x61, 0x00]);
+    const LF = Buffer.from([0x0a]);
+
+    const beforeBuf = Buffer.from(header + infoLines, "utf8");
+    const queueBuf = Buffer.from(`${queueNumber}\n`, "utf8");
+    const afterBuf = Buffer.from(footer, "utf8");
+
+    const finalBuf = Buffer.concat([
+      beforeBuf,
+      // center & enlarge queue number
+      ESC_ALIGN_CENTER,
+      GS_SIZE_2X,
+      queueBuf,
+      GS_SIZE_NORMAL,
+      LF,
+      ESC_ALIGN_LEFT,
+      afterBuf,
+    ]);
+
+    // Write binary ticket and send to printer
+    const tmpFile = "/tmp/pickup_ticket.bin";
+    writeFileSync(tmpFile, finalBuf);
+    await execAsync(`sudo tee /dev/usb/lp0 < ${tmpFile}`);
+    try {
+      unlinkSync(tmpFile);
+    } catch (e) {}
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ pickUpPrint error:", err);
+    res.status(500).json({ success: false, message: "Printer error" });
+  }
+});
+
 app.post("/print", async (req, res) => {
   try {
     const { queueNumber, transactionCode, transactionArray } = req.body;
@@ -266,7 +350,7 @@ app.post("/print", async (req, res) => {
 
     // Build ticket header up to the 'Queue No:' label. We'll print the queue number enlarged
     const header =
-      `\n================================\n` +
+      `================================\n` +
       `  Jesus Good Shepherd School\n` +
       `      Transaction Slip\n` +
       `--------- iQueue Ticket --------\n` +
@@ -292,7 +376,7 @@ app.post("/print", async (req, res) => {
       ` T-Code: ${transactionCode}\n` +
       `--------------------------------\n` +
       `   Thank you for using iQueue!\n` +
-      `================================\n\n`;
+      `================================`;
 
     // Build QR payload JSON as requested: {"Code":"..."}
     const qrPayload = JSON.stringify({ Code: transactionCode });
@@ -309,7 +393,7 @@ app.post("/print", async (req, res) => {
     const beforeBuf = Buffer.from(header, "utf8");
     const queueBuf = Buffer.from(`${queueNumber}\n`, "utf8");
     const qrBuf = buildEscposQRCode(qrPayload, 6, 0x30); // size=6, error level L
-    const afterBuf = Buffer.from(afterQueue + txLines + footer, "utf8");
+    const afterBuf = Buffer.from(afterQueue + txLines + footer + "\n", "utf8");
 
     // Center the QR block using ESC a 1, then reset alignment to left
     const LF = Buffer.from([0x0a]);
@@ -321,11 +405,8 @@ app.post("/print", async (req, res) => {
       queueBuf,
       GS_SIZE_NORMAL,
       LF,
-      ESC_ALIGN_LEFT,
-      // Center QR afterwards
       ESC_ALIGN_CENTER,
       qrBuf,
-      LF,
       ESC_ALIGN_LEFT,
       afterBuf,
     ]);

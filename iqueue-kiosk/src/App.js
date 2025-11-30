@@ -15,6 +15,8 @@ import OfficeServiceSelection from "./pages/officeServiceSelection";
 import TransactionPage from "./pages/transactionPage";
 import InputInformation from "./pages/inputInformationPage";
 import QueueTicketPage from "./pages/queueTicketPage";
+import InQuiryInputInformation from "./pages/inquiryInputInfoPage";
+import InquiryQueueTicketPage from "./pages/inquiryQueueTicketPage";
 
 function App() {
   return (
@@ -35,6 +37,10 @@ function App() {
               <Route path="/TransactionPage" element={<TransactionPage />} />
               <Route path="/InputInformation" element={<InputInformation />} />
               <Route path="/QueueTicketPage" element={<QueueTicketPage />} />
+              <Route path="/InQuiryInputInformation" element={<InQuiryInputInformation />} />
+              <Route path="/InquiryQueueTicketPage" element={<InquiryQueueTicketPage />} />
+
+              
             </Routes>
 
             <VirtualKeyboard />
