@@ -408,18 +408,18 @@ export const useNewOnlineScanningHooks = () => {
 
   const handlePrint = async () => {
     // Prefer scanned transaction objects when available, otherwise use global transactions
-    const transactionArray =
+    const txSource =
       transactionReqDetails &&
       transactionReqDetails.transactionObjects &&
       transactionReqDetails.transactionObjects.length > 0
         ? transactionReqDetails.transactionObjects
         : [];
 
-    if (!transactionArray || transactionArray.length === 0) {
+    if (!txSource || txSource.length === 0) {
       console.warn(" No transactions to print.");
       return;
     }
-    console.log(" Printing transactions:", transactionArray);
+    console.log(" Printing transactions (source):", txSource);
     setPrintStatus("waiting");
 
     // Check printer paper status before attempting to print
@@ -443,19 +443,53 @@ export const useNewOnlineScanningHooks = () => {
     }
 
     try {
-      const queueNumberId = localStorage.getItem("queueNumberId");
+      let queueNumberId = localStorage.getItem("queueNumberId");
 
-      // Save again just to be sure (prevents null issues later)
-      localStorage.setItem("queueNumberId", queueNumberId);
+      // If transactionCode is not stored yet, try to use the scanned value
+      let transactionCode =
+        localStorage.getItem("transactionCode") ||
+        (transactionReqDetails && transactionReqDetails.transactionCode) ||
+        "";
+      if (transactionCode)
+        localStorage.setItem("transactionCode", transactionCode);
 
-      // Print locally via Raspberry Pi
-      const transactionCode = localStorage.getItem("transactionCode");
-      const queueNumber = localStorage.getItem("queueNumber");
+      // If we don't have a queueNumber yet (scan-only flow), create one now
+      let queueNumber = localStorage.getItem("queueNumber");
+      if (!queueNumber) {
+        try {
+          // Determine office like display flow: prefer officeName from scanned details
+          const office =
+            (transactionReqDetails && transactionReqDetails.officeName) ||
+            "General";
+          const queuePayload = {
+            office,
+            officeInvolved: [office],
+            personalInfoId: transactionReqDetails && transactionReqDetails.id,
+            queueType: "Online",
+            pickUp: false,
+          };
+          const qres = await createQueueNumber(queuePayload);
+          queueNumberId = qres.id;
+          queueNumber = qres.queueNumber;
+          localStorage.setItem("queueNumberId", queueNumberId);
+          localStorage.setItem("queueNumber", queueNumber);
+        } catch (err) {
+          console.error("Failed to create queue number before printing:", err);
+        }
+      }
+
+      // Map source transactions into printer-friendly shape
+      const printTransactionArray = txSource.map((t) => ({
+        transactionDetails:
+          t.transactionDetails || t.transactionDetailsArr || "",
+        copies: t.copies || 1,
+        fee: typeof t.fee === "number" ? t.fee : 0,
+      }));
 
       const printPayload = {
         queueNumber,
         transactionCode,
-        transactionArray,
+        transactionArray: printTransactionArray,
       };
       console.log(" Print payload:", printPayload);
 
