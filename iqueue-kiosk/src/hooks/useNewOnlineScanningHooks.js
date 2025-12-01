@@ -1,14 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getTransactionByCode} from "../services/dbServices/createTransactionService";
+import { getTransactionByCode } from "../services/dbServices/createTransactionService";
 import {
   createQueueNumber,
   updateQueueNoStatus,
   getCountWaiting,
   getAverageServiceTime,
 } from "../services/dbServices/addQueueNumber";
-import { useTransaction } from "../context/walkinTransactionContext";
 
 export const useNewOnlineScanningHooks = () => {
   const navigate = useNavigate();
@@ -21,7 +19,6 @@ export const useNewOnlineScanningHooks = () => {
   const [printStatus, setPrintStatus] = useState("idle");
   const isPrinting = printStatus === "waiting" || printStatus === "printing";
   // transaction context (used as fallback when printing)
-  const { transactions, clearTransactions } = useTransaction();
 
   const PRINTER_SERVER =
     process.env.REACT_APP_PRINTER_SERVER || "http://localhost:4000";
@@ -149,6 +146,7 @@ export const useNewOnlineScanningHooks = () => {
       await new Promise((res) => setTimeout(res, 1003));
 
       const queueNumberId = localStorage.getItem("queueNumberId");
+      localStorage.clear();
 
       // additional delay before navigation
       await new Promise((res) => setTimeout(res, 3000));
@@ -415,7 +413,7 @@ export const useNewOnlineScanningHooks = () => {
       transactionReqDetails.transactionObjects &&
       transactionReqDetails.transactionObjects.length > 0
         ? transactionReqDetails.transactionObjects
-        : transactions;
+        : [];
 
     if (!transactionArray || transactionArray.length === 0) {
       console.warn(" No transactions to print.");
@@ -445,7 +443,6 @@ export const useNewOnlineScanningHooks = () => {
     }
 
     try {
-
       const queueNumberId = localStorage.getItem("queueNumberId");
 
       // Save again just to be sure (prevents null issues later)
@@ -455,17 +452,17 @@ export const useNewOnlineScanningHooks = () => {
       const transactionCode = localStorage.getItem("transactionCode");
       const queueNumber = localStorage.getItem("queueNumber");
 
-      const payload = {
+      const printPayload = {
         queueNumber,
         transactionCode,
         transactionArray,
       };
-      console.log(" Print payload:", payload);
+      console.log(" Print payload:", printPayload);
 
       const response = await fetch(`${PRINTER_SERVER}/print`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(printPayload),
       });
 
       if (!response.ok) {
@@ -486,9 +483,7 @@ export const useNewOnlineScanningHooks = () => {
           //console.log("Safe Queue ID before clear:", safeQueueId);
 
           // Clear transactions from context if we used them
-          try {
-            clearTransactions();
-          } catch (e) {}
+
           localStorage.clear(); // reset only after saving ID
 
           navigate("/");

@@ -110,6 +110,7 @@ export const useOnlineScanningHooks = () => {
       await new Promise((res) => setTimeout(res, 1003));
 
       const queueNumberId = localStorage.getItem("queueNumberId");
+      localStorage.clear();
 
       // additional delay before navigation
       await new Promise((res) => setTimeout(res, 3000));
@@ -442,6 +443,7 @@ export const useOnlineScanningHooks = () => {
       transactionCode: details.transactionCode,
       queueNumber: queueNumber,
     };
+    console.log(" Pickup Print Payload:", printPayload);
 
     const response = await fetch(`${PRINTER_SERVER}/pickUpPrint`, {
       method: "POST",
@@ -463,6 +465,7 @@ export const useOnlineScanningHooks = () => {
       await new Promise((res) => setTimeout(res, 1003));
 
       const queueNumberId = localStorage.getItem("queueNumberId");
+      localStorage.clear();
 
       // additional delay before navigation
       await new Promise((res) => setTimeout(res, 3000));
