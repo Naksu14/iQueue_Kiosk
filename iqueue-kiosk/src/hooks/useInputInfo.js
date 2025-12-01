@@ -20,6 +20,7 @@ export const useInputInfo = () => {
             firstName: "",
             lastName: "",
             middleName: "",
+            suffixName: "",
             studentLrn: "",
             isAlumni: false,
             grade: "",
@@ -36,6 +37,7 @@ export const useInputInfo = () => {
         firstName: "",
         lastName: "",
         middleName: "",
+        suffixName: "",
         studentLrn: "",
         isAlumni: false,
         grade: "",
@@ -123,6 +125,7 @@ export const useInputInfo = () => {
         firstName: toTitleCase(formData.firstName || ""),
         lastName: toTitleCase(formData.lastName || ""),
         middleName: toTitleCase(formData.middleName || ""),
+        suffixName: toTitleCase(formData.suffixName || ""),
         section: toTitleCase(formData.section || ""),
         visitorName: toTitleCase(formData.visitorName || ""),
       };

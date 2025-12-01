@@ -5,13 +5,18 @@ import SubHeader from "../components/layout/subheader";
 import BackButton from "../components/button/backButton";
 import { useInputInfo } from "../hooks/useInputInfo";
 import { useKeyboard } from "../context/KeyboardContext";
+import ConfirmationTransactionModal from "../components/modal/confirmationTransactionModal";
 
 const InputInformation = () => {
   const navigate = useNavigate();
   const { formData, handleChange, handleSubmit, isSubmitting } = useInputInfo();
   const { showKeyboard, isVisible, hideKeyboard } = useKeyboard();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [showVisitorModal, setShowVisitorModal] = useState(false);
+
+  // read transactions to show in confirmation modal
+  const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
 
   const handleVisitorCheckboxChange = (e) => {
     const checked = e.target.checked;
@@ -57,14 +62,20 @@ const InputInformation = () => {
   return (
     <div
       id="form-container"
-      className={`flex flex-col items-center justify-center overflow-y-auto h-screen transition-all duration-300 ${
+      className={`flex flex-col items-center justify-center overflow-y-auto h-screen transition-all duration-300 -mt-4 ${
         isVisible ? "py-60" : "pb-0"
       }`}
     >
       <div className="w-full">
         <form
-          onSubmit={handleSubmit}
-          className="bg-white w-full p-6 rounded-md shadow-lg text-left"
+          onSubmit={(e) => {
+            // prevent default immediate submit and show confirmation modal
+            e.preventDefault();
+            // hide keyboard when showing modal
+            hideKeyboard();
+            setShowConfirmModal(true);
+          }}
+          className="bg-white w-full p-2 py-4 rounded-md shadow-lg text-left"
         >
           <div className="flex justify-center -mt-2">
             <SubHeader text="Help us identify and process your request faster" />
@@ -162,15 +173,27 @@ const InputInformation = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1">Middle Name</label>
+              <label className="block font-semibold mb-1">MI</label>
               <input
                 type="text"
                 name="middleName"
                 value={formData.middleName}
                 onChange={handleChange}
                 onFocus={handleFocus}
-                className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="Middle name (if applicable)"
+                className="w-[150px] border rounded-md px-4 py-3 bg-gray-100"
+                placeholder="MI"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Suffix</label>
+              <input
+                type="text"
+                name="suffixName"
+                value={formData.suffixName}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                className="w-[100px] border rounded-md px-4 py-3 bg-gray-100"
+                placeholder="Suffix"
               />
             </div>
           </div>
@@ -266,7 +289,6 @@ const InputInformation = () => {
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 hover:shadow-lg"
                 }`}
-              onClick={hideKeyboard}
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -346,6 +368,19 @@ const InputInformation = () => {
           </div>
         </div>
       )}
+      <ConfirmationTransactionModal
+        show={showConfirmModal}
+        onCancel={() => setShowConfirmModal(false)}
+        onConfirm={async () => {
+          setShowConfirmModal(false);
+          try {
+            await handleSubmit({ preventDefault: () => {} });
+          } catch (e) {}
+        }}
+        formData={formData}
+        transactions={transactions}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 };

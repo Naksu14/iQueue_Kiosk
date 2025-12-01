@@ -104,7 +104,8 @@ export const KeyboardProvider = ({ children }) => {
     } else if (
       inputName === "firstName" ||
       inputName === "lastName" ||
-      inputName === "middleName"
+      inputName === "middleName" ||
+      inputName === "suffixName"
     ) {
       if (key === "Clear") {
         value = "";
