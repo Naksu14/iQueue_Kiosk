@@ -28,7 +28,9 @@ export const KeyboardProvider = ({ children }) => {
 
     const capitalizeFirstLetter = (str) => {
       if (!str) return "";
-      return str.charAt(0).toUpperCase() + str.slice(1);
+      // Ensure first character is uppercase and the rest are lowercase
+      // Works with diacritics like ñ/Ñ as JS string case methods are Unicode-aware
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     };
 
     // Handle "Enter" key: just close the keyboard
@@ -166,9 +168,21 @@ export const KeyboardProvider = ({ children }) => {
     }
   };
 
+  // Expose current target input value to consumers (e.g., keyboard UI)
+  const getTargetValue = () => {
+    if (!targetInput || !targetInput.input) return "";
+    return targetInput.input.value || "";
+  };
+
   return (
     <KeyboardContext.Provider
-      value={{ isVisible, showKeyboard, hideKeyboard, handleKeyPress }}
+      value={{
+        isVisible,
+        showKeyboard,
+        hideKeyboard,
+        handleKeyPress,
+        getTargetValue,
+      }}
     >
       {children}
     </KeyboardContext.Provider>

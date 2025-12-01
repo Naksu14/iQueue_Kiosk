@@ -15,7 +15,8 @@ const ALT_KEYS = {
 const LONG_PRESS_THRESHOLD = 500; // ms
 
 export default function VirtualKeyboard() {
-  const { isVisible, handleKeyPress, hideKeyboard } = useKeyboard(); // <-- added hideKeyboard
+  const { isVisible, handleKeyPress, hideKeyboard, getTargetValue } =
+    useKeyboard(); // <-- added getTargetValue
   const [showNum, setShowNum] = useState(false);
   const [isUppercase, setIsUppercase] = useState(true);
   const [altForKey, setAltForKey] = useState(null); // which key's alt popup is open
@@ -78,7 +79,15 @@ export default function VirtualKeyboard() {
         return (
           <button
             key={key}
-            onClick={() => handleKeyPress(displayKey)}
+            onClick={() => {
+              const preLen =
+                typeof getTargetValue === "function"
+                  ? getTargetValue().length
+                  : null;
+              handleKeyPress(displayKey);
+              // If this is the first character typed, switch to lowercase display
+              if (preLen === 0) setIsUppercase(false);
+            }}
             className={keyStyle}
           >
             {displayKey}
@@ -104,7 +113,14 @@ export default function VirtualKeyboard() {
               {hasAlt.map((alt) => (
                 <button
                   key={alt}
-                  onClick={() => selectAlternate(key, alt)}
+                  onClick={() => {
+                    const preLen =
+                      typeof getTargetValue === "function"
+                        ? getTargetValue().length
+                        : null;
+                    selectAlternate(key, alt);
+                    if (preLen === 0) setIsUppercase(false);
+                  }}
                   className="bg-[#334155] text-white rounded-md min-w-[45px] h-[45px] text-lg font-semibold flex items-center justify-center active:scale-95"
                 >
                   {isUppercase ? alt.toUpperCase() : alt.toLowerCase()}
@@ -192,14 +208,24 @@ export default function VirtualKeyboard() {
         </button>
 
         <button
-          onClick={() => handleKeyPress("Backspace")}
+          onClick={() => {
+            const preLen =
+              typeof getTargetValue === "function"
+                ? getTargetValue().length
+                : null;
+            handleKeyPress("Backspace");
+            if (preLen !== null && preLen <= 1) setIsUppercase(true);
+          }}
           className="bg-red-600 text-white rounded-lg w-[70px] h-[50px] text-lg font-semibold active:scale-95"
         >
           ⌫
         </button>
 
         <button
-          onClick={() => handleKeyPress("Clear")}
+          onClick={() => {
+            handleKeyPress("Clear");
+            setIsUppercase(true);
+          }}
           className="bg-yellow-600 text-white rounded-lg w-[90px] h-[50px] text-base font-semibold active:scale-95"
         >
           Clear
