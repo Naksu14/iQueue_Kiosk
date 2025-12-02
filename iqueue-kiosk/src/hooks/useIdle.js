@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 export default function useIdle({
-  timeout = 120000,
+  timeout = 60000,
   onIdle = () => {},
   onActive = () => {},
   considerHiddenAsIdle = true,

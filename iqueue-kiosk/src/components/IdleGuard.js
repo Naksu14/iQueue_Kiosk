@@ -26,7 +26,7 @@ export default function IdleGuard() {
   const [show, setShow] = useState(false);
 
   useIdle({
-    timeout: 120000, // 2 minutes of inactivity
+    timeout: 60000, // 1 minute of inactivity
     considerHiddenAsIdle: true,
     onIdle: () => {
       hideKeyboard();
