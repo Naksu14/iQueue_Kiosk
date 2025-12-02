@@ -16,14 +16,27 @@ const IdleOverlay = ({ show, imageSrc, onResume }) => {
       className="fixed inset-0 z-[1000] bg-[#0b1020]/80 backdrop-blur-sm flex items-center justify-center touch-none"
       onPointerDownCapture={(e) => {
         e.stopPropagation();
-        handleResume();
       }}
       onTouchStartCapture={(e) => {
         e.stopPropagation();
-        handleResume();
+      }}
+      onPointerUpCapture={(e) => {
+        e.stopPropagation();
+        // Fallback: if no click is fired (some touch devices), resume shortly after
+        setTimeout(() => {
+          if (!resumedRef.current) handleResume();
+        }, 200);
+      }}
+      onTouchEndCapture={(e) => {
+        e.stopPropagation();
+        setTimeout(() => {
+          if (!resumedRef.current) handleResume();
+        }, 200);
       }}
       onClickCapture={(e) => {
         e.stopPropagation();
+        // Primary path: resume on click so overlay swallows the click first
+        handleResume();
       }}
     >
       <img
@@ -57,10 +70,7 @@ export default function IdleGuard() {
     <IdleOverlay
       show={show}
       imageSrc={touchImage}
-      onResume={() => {
-        // Defer unmounting to the next tick to avoid click-through
-        setTimeout(() => setShow(false), 0);
-      }}
+      onResume={() => setShow(false)}
     />
   );
 }
