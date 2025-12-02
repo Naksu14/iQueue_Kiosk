@@ -7,13 +7,25 @@ const IdleOverlay = ({ show, imageSrc, onResume }) => {
   if (!show) return null;
   return (
     <div
-      className="fixed inset-0 z-[1000] bg-[#0b1020]/80 backdrop-blur-sm flex items-center justify-center"
-      onPointerDown={onResume}
+      className="fixed inset-0 z-[1000] bg-[#0b1020]/80 backdrop-blur-sm flex items-center justify-center touch-none"
+      onPointerDownCapture={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onPointerUpCapture={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onResume();
+      }}
+      onClickCapture={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
       <img
         src={imageSrc}
         alt="Tap to start"
-        className="w-screen h-screen object-contain select-none"
+        className="w-screen h-screen object-contain select-none pointer-events-none"
         draggable={false}
       />
     </div>
@@ -41,7 +53,10 @@ export default function IdleGuard() {
     <IdleOverlay
       show={show}
       imageSrc={touchImage}
-      onResume={() => setShow(false)}
+      onResume={() => {
+        // Defer unmounting to the next tick to avoid click-through
+        setTimeout(() => setShow(false), 0);
+      }}
     />
   );
 }
