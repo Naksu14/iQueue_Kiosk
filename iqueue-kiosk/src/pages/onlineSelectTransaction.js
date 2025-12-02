@@ -34,7 +34,7 @@ const OnlineSelectTransaction = () => {
         {/* Walk-in Request */}
         <Button
           onClick={() => navigate("/ScanningNewQrPage")}
-          className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+          className="w-64 h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
           <IconContainer className="p-2 bg-green-600 text-green-600 rounded-full mb-2">
             <FaCreditCard size={26} />
@@ -48,7 +48,7 @@ const OnlineSelectTransaction = () => {
         {/* Walk-in Pick up Request */}
         <Button
           onClick={() => navigate("/ScanningPage")}
-          className="w-[230px] h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
+          className="w-64 h-48 flex flex-col items-center justify-center rounded-lg bg-white shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
         >
           <IconContainer className="bg-blue-500 text-blue-600 rounded-full mb-2">
             <FaBoxOpen size={26} />

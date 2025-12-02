@@ -17,6 +17,7 @@ import InputInformation from "./pages/inputInformationPage";
 import QueueTicketPage from "./pages/queueTicketPage";
 import InQuiryInputInformation from "./pages/inquiryInputInfoPage";
 import InquiryQueueTicketPage from "./pages/inquiryQueueTicketPage";
+import IdleGuard from "./components/IdleGuard";
 
 function App() {
   return (
@@ -28,22 +29,40 @@ function App() {
           <KeyboardProvider>
             <Routes>
               <Route path="/" element={<WelcomePage />} />
-              <Route path="/WalkinSelectTransaction" element={<WalkinSelectTransaction />} />
-              <Route path="/OnlineSelectTransaction" element={<OnlineSelectTransaction />} />
-              <Route path="/ScanningNewQrPage" element={<ScanningNewQrPage />} />
+              <Route
+                path="/WalkinSelectTransaction"
+                element={<WalkinSelectTransaction />}
+              />
+              <Route
+                path="/OnlineSelectTransaction"
+                element={<OnlineSelectTransaction />}
+              />
+              <Route
+                path="/ScanningNewQrPage"
+                element={<ScanningNewQrPage />}
+              />
               <Route path="/ScanningPage" element={<ScanningPage />} />
               <Route path="/PickRequestPage" element={<PickRequestPage />} />
-              <Route path="/OfficeServiceSelection" element={<OfficeServiceSelection />} />
+              <Route
+                path="/OfficeServiceSelection"
+                element={<OfficeServiceSelection />}
+              />
               <Route path="/TransactionPage" element={<TransactionPage />} />
               <Route path="/InputInformation" element={<InputInformation />} />
               <Route path="/QueueTicketPage" element={<QueueTicketPage />} />
-              <Route path="/InQuiryInputInformation" element={<InQuiryInputInformation />} />
-              <Route path="/InquiryQueueTicketPage" element={<InquiryQueueTicketPage />} />
-
-              
+              <Route
+                path="/InQuiryInputInformation"
+                element={<InQuiryInputInformation />}
+              />
+              <Route
+                path="/InquiryQueueTicketPage"
+                element={<InquiryQueueTicketPage />}
+              />
             </Routes>
 
             <VirtualKeyboard />
+            {/* Idle overlay watcher (needs KeyboardContext) */}
+            <IdleGuard />
           </KeyboardProvider>
         </TransactionProvider>
       </main>
@@ -52,7 +71,6 @@ function App() {
 }
 
 export default App;
-
 
 // import "./App.css";
 // import { Routes, Route } from "react-router-dom";

@@ -4,7 +4,7 @@ import { FaQuestionCircle } from "react-icons/fa";
 export default function HelpGuideModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg w-[90%] max-h-[90%] overflow-y-auto px-4 py-5 relative">
+      <div className="bg-white rounded-2xl shadow-xl w-[92%] max-w-[980px] max-h-[92%] overflow-y-auto px-5 py-6 relative">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -15,55 +15,115 @@ export default function HelpGuideModal({ onClose }) {
         </button>
 
         {/* Header */}
-        <div className="flex flex-col items-center mb-3">
+        <div className="flex flex-col items-center mb-4">
           <div className="flex items-center">
-            <h2 className="text-xl font-bold text-center">Help Guide</h2>
-            <FaQuestionCircle className="text-blue-500 text-2xl m-1" />
+            <h2 className="text-2xl font-bold">Help Guide</h2>
+            <FaQuestionCircle className="text-blue-500 text-2xl ml-2" />
           </div>
-          <p className="text-gray-500 text-sm text-center mt-1">
-            Please read carefully before proceeding.
+          <p className="text-gray-500 text-base mt-2">
+            Quick steps to use the kiosk for Walk-in and Online processes.
           </p>
         </div>
 
         {/* Body */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full justify-start">
-          {/* Walk-in Request */}
-          <div className="bg-blue-50 rounded-lg flex-1 p-1 flex flex-col shadow-sm">
-            <h3 className="font-bold text-lg text-center mb-2">
-              Walk–in Request
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+          {/* Walk-in Process */}
+          <section className="bg-green-50 rounded-xl p-5 shadow border border-green-100">
+            <h3 className="font-bold text-xl mb-3 text-green-700">
+              Walk‑in Process
             </h3>
-            <p className="text-gray-700 text-sm mb-2 text-center">
-              Use this if you don’t have an appointment.
-            </p>
-            <b className="text-sm mb-1 block text-center">Steps:</b>
-            <ol className="list-decimal list-inside text-gray-700 text-sm mb-3 pl-4 w-full text-left">
-              <li>Select the office (Registrar, Accounting)</li>
-              <li>Select the purpose (TOR, Certificate of grade)</li>
-              <li>Choose Request or Pick Up</li>
-              <li>Get a printed Transaction Slip</li>
+            <ol className="list-decimal list-inside text-gray-800 text-base space-y-2 text-left">
+              <li>
+                Tap <span className="font-semibold">Request Transaction</span>.
+              </li>
+              <li>
+                Select your <span className="font-semibold">Office</span> (e.g.,
+                Accounting or Registrar).
+              </li>
+              <li>
+                Select the{" "}
+                <span className="font-semibold">Service to Request</span> (e.g.,
+                TOR, Certificate of Grades).
+              </li>
+              <li>
+                Enter your <span className="font-semibold">details</span> and
+                tap <span className="font-semibold">Submit</span>.
+              </li>
+              <li>
+                Print your <span className="font-semibold">Queue Ticket</span>.
+              </li>
+              <li>Wait for your number on the display; proceed when called.</li>
             </ol>
-            <p className="text-gray-500 text-center text-sm">
-              For students, guests, and anyone who didn’t book online.
+            <p className="text-sm text-gray-600 mt-3">
+              For new requests, proceed to{" "}
+              <span className="font-semibold">Accounting</span> first for
+              payment.
             </p>
-          </div>
 
-          {/* Scan QR Code */}
-          <div className="bg-blue-50 rounded-lg flex-1 p-1 flex flex-col shadow-sm">
-            <h3 className="font-bold text-lg text-center mb-2">Scan QR Code</h3>
-            <p className="text-gray-700 text-sm mb-2 text-center">
-              Already booked online? This is for you.
+            <div className="mt-4 border-t pt-4">
+              <h4 className="font-semibold text-green-700 text-base mb-2">
+                For Pick‑up Documents
+              </h4>
+              <ol className="list-decimal list-inside text-gray-800 text-base space-y-2 text-left">
+                <li>
+                  Tap <span className="font-semibold">Pick‑up Request</span>.
+                </li>
+                <li>Scan your ticket’s QR code.</li>
+                <li>
+                  Print your <span className="font-semibold">Queue Ticket</span>
+                  .
+                </li>
+                <li>Wait for your number on the display screen.</li>
+                <li>Receive your documents.</li>
+              </ol>
+            </div>
+          </section>
+
+          {/* Online Process */}
+          <section className="bg-yellow-50 rounded-xl p-5 shadow border border-yellow-100">
+            <h3 className="font-bold text-xl mb-3 text-yellow-700">
+              Online Process
+            </h3>
+            <ol className="list-decimal list-inside text-gray-800 text-base space-y-2 text-left">
+              <li>
+                Tap <span className="font-semibold">Online Request</span>.
+              </li>
+              <li>
+                Scan your <span className="font-semibold">QR code</span> from
+                the iQueue app.
+              </li>
+              <li>
+                Wait for your{" "}
+                <span className="font-semibold">queue number</span> to appear in
+                the app.
+              </li>
+              <li>
+                Proceed to the{" "}
+                <span className="font-semibold">assigned office</span>.
+              </li>
+              <li>Wait for your number on the display; proceed when called.</li>
+            </ol>
+            <p className="text-sm text-gray-600 mt-3">
+              For new requests, proceed to{" "}
+              <span className="font-semibold">Accounting</span> first for
+              payment.
             </p>
-            <b className="text-sm mb-1 block text-center">Steps:</b>
-            <ul className="list-disc list-inside text-gray-700 text-sm mb-3 pl-5 w-full text-left">
-              <li>Open your iQueue application</li>
-              <li>Show your QR Code</li>
-              <li>Let the scanner read your code</li>
-              <li>Your ticket prints automatically</li>
-            </ul>
-            <p className="text-gray-500 text-center text-sm">
-              Fast lane for online appointments.
-            </p>
-          </div>
+
+            <div className="mt-4 border-t pt-4">
+              <h4 className="font-semibold text-yellow-700 text-base mb-2">
+                For Pick‑up Documents
+              </h4>
+              <ol className="list-decimal list-inside text-gray-800 text-base space-y-2 text-left">
+                <li>
+                  Tap <span className="font-semibold">Online Request</span>.
+                </li>
+                <li>Scan your QR code for pick‑up.</li>
+                <li>Wait for your queue number in the app.</li>
+                <li>Wait for your number on the display screen.</li>
+                <li>Receive your documents.</li>
+              </ol>
+            </div>
+          </section>
         </div>
       </div>
     </div>
