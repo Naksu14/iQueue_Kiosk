@@ -62,19 +62,19 @@ export const useQueueTicket = () => {
         transactionArray,
       };
 
-      // const response = await fetch(`${PRINTER_SERVER}/print`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(payload),
-      // });
+      const response = await fetch(`${PRINTER_SERVER}/print`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      // if (!response.ok) {
-      //   // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
-      //   const text = await response.text();
-      //   console.error("Print server responded with error:", text);
-      //   setPrintStatus("error");
-      //   throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
-      // }
+      if (!response.ok) {
+        // This block catches non-2xx HTTP responses (e.g., 500, 400) from the server.
+        const text = await response.text();
+        console.error("Print server responded with error:", text);
+        setPrintStatus("error");
+        throw new Error("Printing failed"); // ⬅ This triggers the "error" status.
+      }
 
       // Simulate ticket printing delay
       setTimeout(() => {

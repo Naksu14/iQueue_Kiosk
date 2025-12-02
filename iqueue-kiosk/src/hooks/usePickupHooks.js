@@ -91,7 +91,11 @@ export const usePickupHooks = () => {
       const statusRes = await fetch(`${PRINTER_SERVER}/printerStatus`);
       if (statusRes.ok) {
         const statusJson = await statusRes.json();
-        if (statusJson && statusJson.ok === true && statusJson.hasPaper === false) {
+        if (
+          statusJson &&
+          statusJson.ok === true &&
+          statusJson.hasPaper === false
+        ) {
           console.warn("Printer reports no paper — aborting pickup print.");
           setIsPrinting(false);
           // Optionally set a user-visible error state; here we set scanStatus to reflect the failure

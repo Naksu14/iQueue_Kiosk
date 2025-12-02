@@ -133,14 +133,14 @@ const TransactionDetails = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
               <button
                 onClick={() => setShowCancelModal(true)}
-                className="w-full sm:w-[45%] px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium text-base shadow-sm hover:bg-gray-200 hover:shadow transition-all duration-200"
+                className="w-full sm:w-[45%] px-6 py-3 border rounded-xl bg-gray-100 text-gray-700 font-medium text-xl shadow-sm hover:bg-gray-200 hover:shadow transition-all duration-200"
               >
                 Cancel
               </button>
 
               <button
                 onClick={() => navigate("/InputInformation")}
-                className="w-full sm:w-[45%] px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white text-white font-semibold text-base shadow-md hover:opacity-90 hover:shadow-lg active:scale-[0.98] transition-all duration-200"
+                className="w-full sm:w-[45%] px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-xl shadow-md hover:opacity-90 hover:shadow-lg active:scale-[0.98] transition-all duration-200"
               >
                 Confirm
               </button>

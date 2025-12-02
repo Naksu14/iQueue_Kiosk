@@ -9,7 +9,7 @@ export default function TransactionButton({
     <button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={`fixed bottom-5 left-[165px] -translate-x-1/2 z-50 
+      className={`fixed bottom-20 left-[120px] -translate-x-1/2 z-50 
     flex items-center justify-center px-4 h-12
     rounded-full text-md font-semibold tracking-wide shadow-lg 
     transition-all duration-300 ease-in-out

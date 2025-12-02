@@ -84,7 +84,7 @@ const InputInformation = () => {
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
             <div className="col-span-2">
               <label className="block font-semibold mb-1">
-                ID number <span className="text-red-500">*</span>
+                LRN | Student Number
               </label>
               <input
                 type="text"
@@ -100,7 +100,6 @@ const InputInformation = () => {
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="LRN | Student number"
                 maxLength={12}
-                required
               />
             </div>
 

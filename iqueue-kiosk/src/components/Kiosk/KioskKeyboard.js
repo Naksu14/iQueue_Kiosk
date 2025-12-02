@@ -98,11 +98,9 @@ export default function VirtualKeyboard() {
       return (
         <div key={key} className="relative">
           <button
-            onMouseDown={() => handlePressStart(key)}
-            onMouseUp={() => handlePressEnd(key)}
-            onMouseLeave={() => handlePressEnd(key)}
-            onTouchStart={() => handlePressStart(key)}
-            onTouchEnd={() => handlePressEnd(key)}
+            onPointerDown={() => handlePressStart(key)}
+            onPointerUp={() => handlePressEnd(key)}
+            onPointerLeave={() => handlePressEnd(key)}
             onContextMenu={(e) => e.preventDefault()}
             className={keyStyle}
           >
