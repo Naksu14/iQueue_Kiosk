@@ -1,3 +1,4 @@
+// IdleGuard.js
 import React, { useState } from "react";
 import useIdle from "../hooks/useIdle";
 import { useKeyboard } from "../context/KeyboardContext";
@@ -8,6 +9,7 @@ const IdleOverlay = ({ show, imageSrc, onResume }) => {
   return (
     <div
       className="fixed inset-0 z-[1000] bg-[#0b1020]/80 backdrop-blur-sm flex items-center justify-center"
+      // onPointerDown triggers the onResume action
       onPointerDown={onResume}
     >
       <img
@@ -21,12 +23,11 @@ const IdleOverlay = ({ show, imageSrc, onResume }) => {
 };
 
 export default function IdleGuard() {
-  // Hook must be called unconditionally (inside provider in App.js)
   const { hideKeyboard } = useKeyboard();
   const [show, setShow] = useState(false);
 
   useIdle({
-    timeout: 60000, // 1 minute of inactivity
+    timeout: 60000,
     considerHiddenAsIdle: true,
     onIdle: () => {
       hideKeyboard();
@@ -37,11 +38,22 @@ export default function IdleGuard() {
     },
   });
 
+  // --- MODIFICATION HERE ---
+  const resumeWithDelay = () => {
+    // A slight delay (e.g., 200ms) prevents the tap that closes
+    // the overlay from immediately clicking an element underneath.
+    setTimeout(() => {
+      setShow(false);
+    }, 200);
+  };
+  // --- END MODIFICATION ---
+
   return (
     <IdleOverlay
       show={show}
       imageSrc={touchImage}
-      onResume={() => setShow(false)}
+      // Pass the new function to the overlay
+      onResume={resumeWithDelay}
     />
   );
 }
