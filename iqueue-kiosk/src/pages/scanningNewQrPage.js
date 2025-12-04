@@ -186,8 +186,8 @@ const ScanningNewQrPage = () => {
             >
               {isDisplaying ? (
                 <>
-                  <ImSpinner2 className="animate-spin text-2xl text-white" />
-                  <span>Getting Queue Number...</span>
+                  <ImSpinner2 className="animate-spin text-xl text-white" />
+                  <span>Getting Queue No...</span>
                 </>
               ) : (
                 "Get Queue Number"

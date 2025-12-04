@@ -26,7 +26,7 @@ const QueueTicketPage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-4">
+    <div className="flex flex-col items-center justify-center ">
       <header className="text-center">
         <div className="flex gap-2 justify-center">
           <SubHeader

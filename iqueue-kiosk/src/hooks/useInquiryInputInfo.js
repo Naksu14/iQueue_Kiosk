@@ -60,7 +60,7 @@ export const useInquiryInputInfo = () => {
               o.id?.toString() === formData.officeId?.toString()
           );
           if (selected)
-            officeName =
+            officeName = 
               selected.office_name ||
               selected.officeName ||
               selected.name ||
