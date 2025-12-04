@@ -162,9 +162,12 @@ export const useInputInfo = () => {
       const uniqueOfficeNames = [
         ...new Set(transactions.map((t) => t.officeName).filter(Boolean)),
       ];
-
+      // Determine if any transaction requires direct accounting
+      // If direct accounting is enabled in settings, default to true
+      // so that in case of fetch failure, we err on the side of caution
+      // and route to Accounting.
       // should be Accounting so the user can pay; include Accounting in involved.
-      const DirectAccounting = directAccountingSettings?.enabled;
+      const DirectAccounting = directAccountingSettings?.enabled || true;
 
       let officeInvolved = [...uniqueOfficeNames];
       let mainOffice;
