@@ -8,7 +8,8 @@ import { getDirectAccountingSettings } from "../services/dbServices/officeKioskS
 export const useInputInfo = () => {
   const { attachPersonalInfoIdToAllTransactions } = useTransaction();
   const navigate = useNavigate();
-  const [directAccountingSettings, setDirectAccountingSettings] = useState(null);
+  const [directAccountingSettings, setDirectAccountingSettings] =
+    useState(null);
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -16,7 +17,7 @@ export const useInputInfo = () => {
         setDirectAccountingSettings(settings);
       } catch (error) {
         console.error("Failed to fetch direct accounting settings:", error);
-      } 
+      }
     };
     fetchSettings();
   }, []);
@@ -167,7 +168,7 @@ export const useInputInfo = () => {
       // so that in case of fetch failure, we err on the side of caution
       // and route to Accounting.
       // should be Accounting so the user can pay; include Accounting in involved.
-      const DirectAccounting = directAccountingSettings?.enabled || true;
+      const DirectAccounting = directAccountingSettings?.enabled;
 
       let officeInvolved = [...uniqueOfficeNames];
       let mainOffice;
