@@ -2,6 +2,11 @@ import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
+export const getDirectAccountingSettings = async () => {
+  const response = await axios.get(`${API_URL}/queue-number/direct-accounting`);
+  return response.data;
+}
+
 export const getOfficeById = async (office_id) => {
   const response = await axios.get(`${API_URL}/office-details/${office_id}`);
   return response.data;

@@ -3,10 +3,23 @@ import { useNavigate } from "react-router-dom";
 import { createUserInfo } from "../services/dbServices/createTransactionService";
 import { createQueueNumber } from "../services/dbServices/addQueueNumber";
 import { useTransaction } from "../context/walkinTransactionContext";
+import { getDirectAccountingSettings } from "../services/dbServices/officeKioskService";
 
 export const useInputInfo = () => {
   const { attachPersonalInfoIdToAllTransactions } = useTransaction();
   const navigate = useNavigate();
+  const [directAccountingSettings, setDirectAccountingSettings] = useState(null);
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await getDirectAccountingSettings();
+        setDirectAccountingSettings(settings);
+      } catch (error) {
+        console.error("Failed to fetch direct accounting settings:", error);
+      } 
+    };
+    fetchSettings();
+  }, []);
 
   const [formData, setFormData] = useState(() => {
     // Load any temporarily saved form data so users who navigate back see their inputs
@@ -150,17 +163,13 @@ export const useInputInfo = () => {
         ...new Set(transactions.map((t) => t.officeName).filter(Boolean)),
       ];
 
-      // If all transactions are inquiries, route them to their specific office(s).
-      // If any transaction is NOT an Inquiry (e.g., Payment), the primary office
       // should be Accounting so the user can pay; include Accounting in involved.
-      const allInquiry =
-        transactions.length > 0 &&
-        transactions.every((t) => t.transactionType === "Inquiry");
+      const DirectAccounting = directAccountingSettings?.enabled;
 
       let officeInvolved = [...uniqueOfficeNames];
       let mainOffice;
 
-      if (allInquiry) {
+      if (!DirectAccounting) {
         // All are inquiries — keep their specific office(s)
         mainOffice = officeInvolved.length > 1 ? "Multiple" : officeInvolved[0];
       } else {
