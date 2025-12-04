@@ -26,7 +26,11 @@ export const useQueueTicket = () => {
       const statusRes = await fetch(`${PRINTER_SERVER}/printerStatus`);
       if (statusRes.ok) {
         const statusJson = await statusRes.json();
-        if (statusJson && statusJson.ok === true && statusJson.hasPaper === false) {
+        if (
+          statusJson &&
+          statusJson.ok === true &&
+          statusJson.hasPaper === false
+        ) {
           // No paper: set UI state and abort printing
           setPrintStatus("no-paper");
           return;
@@ -38,19 +42,7 @@ export const useQueueTicket = () => {
     }
 
     try {
-      //console.log("Submitting transactions:", transactions);
-
-      // Send transactions to backend
-      const transactionArray = await createUserTransaction(transactions);
-      // console.log(" Transactions created:", res);
-
-      //  Get queueNumberId from backend or localStorage (fallback)
-      const queueNumberId =
-        transactionArray?.queueNumberId ||
-        localStorage.getItem("queueNumberId");
-
-      // Save again just to be sure (prevents null issues later)
-      localStorage.setItem("queueNumberId", queueNumberId);
+      // Attempt printing first; only create DB transaction on success
 
       // Print locally via Raspberry Pi
       const transactionCode = localStorage.getItem("transactionCode");
@@ -59,7 +51,9 @@ export const useQueueTicket = () => {
       const payload = {
         queueNumber,
         transactionCode,
-        transactionArray,
+        // For printing purposes, use the in-memory transactions.
+        // We will persist to DB only after a successful print.
+        transactionArray: transactions,
       };
 
       const response = await fetch(`${PRINTER_SERVER}/print`, {
@@ -81,33 +75,50 @@ export const useQueueTicket = () => {
         setPrintStatus("success");
 
         setTimeout(() => {
-          //  Backup before clearing localStorage
-          const safeQueueId = queueNumberId;
-          //console.log("Safe Queue ID before clear:", safeQueueId);
-
-          clearTransactions();
-          localStorage.clear(); // reset only after saving ID
-
-          navigate("/");
-
-          //  Schedule automatic status update after 20 seconds
-          setTimeout(async () => {
-            if (!safeQueueId) {
-              console.warn(" No valid queue ID found for status update!");
-              return;
-            }
-
-            //console.log(" Updating queue status → waiting:", safeQueueId);
+          (async () => {
+            // Persist transactions only after a successful print
             try {
-              await updateQueueNoStatus(safeQueueId, "waiting");
-            } catch (error) {
-              console.error(" Failed to update queue status:", error);
+              const transactionArray = await createUserTransaction(
+                transactions
+              );
+
+              const queueNumberId =
+                transactionArray?.queueNumberId ||
+                localStorage.getItem("queueNumberId");
+
+              if (queueNumberId) {
+                localStorage.setItem("queueNumberId", queueNumberId);
+              }
+
+              // Backup before clearing localStorage
+              const safeQueueId = queueNumberId;
+
+              clearTransactions();
+              localStorage.clear();
+
+              navigate("/");
+
+              // Schedule automatic status update after 30 seconds
+              setTimeout(async () => {
+                if (!safeQueueId) {
+                  console.warn(" No valid queue ID found for status update!");
+                  return;
+                }
+                try {
+                  await updateQueueNoStatus(safeQueueId, "waiting");
+                } catch (error) {
+                  console.error(" Failed to update queue status:", error);
+                }
+              }, 30000);
+            } catch (err) {
+              // If DB persistence fails after a successful print, keep UI success
+              console.error(" Failed to create transactions post-print:", err);
             }
-          }, 30000); // 30 seconds delay
+          })();
         }, 5000); // Wait before navigating home
       }, 3000); // Simulated delay for printing
     } catch (err) {
-      console.error(" Failed to create transactions:", err);
+      console.error(" Printing failed:", err);
       setPrintStatus("error");
     }
   };
