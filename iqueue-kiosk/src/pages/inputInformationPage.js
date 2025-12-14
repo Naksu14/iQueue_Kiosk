@@ -9,11 +9,18 @@ import ConfirmationTransactionModal from "../components/modal/confirmationTransa
 
 const InputInformation = () => {
   const navigate = useNavigate();
-  const { formData, handleChange, handleSubmit, isSubmitting } = useInputInfo();
+  const {
+    formData,
+    handleChange,
+    handleSubmit,
+    isSubmitting,
+    handleFetchStudentInfo,
+  } = useInputInfo();
   const { showKeyboard, isVisible, hideKeyboard } = useKeyboard();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [showVisitorModal, setShowVisitorModal] = useState(false);
+  const [lookupMessage, setLookupMessage] = useState("");
 
   // read transactions to show in confirmation modal
   const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
@@ -59,6 +66,9 @@ const InputInformation = () => {
     }, 100);
   };
 
+  const lrnValue = (formData.studentLrn || "").toString().trim();
+  const isLrnValid = lrnValue.length === 12;
+
   return (
     <div
       id="form-container"
@@ -81,69 +91,90 @@ const InputInformation = () => {
             <SubHeader text="Help us identify and process your request faster" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
-            <div className="col-span-2">
-              <label className="block font-semibold mb-1">
-                LRN | Student Number
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                name="studentLrn"
-                value={formData.studentLrn}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/\D/g, "").slice(0, 20);
-                  handleChange({ target: { name: "studentLrn", value } });
-                }}
-                onFocus={handleFocus}
-                className="w-full border rounded-md px-4 py-3 bg-gray-100"
-                placeholder="LRN | Student number"
-                maxLength={12}
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-4">
+            <div className="col-span-3 flex gap-2 ">
+              <div className="w-full">
+                <label className="block font-semibold mb-1">
+                  LRN {lookupMessage ? <span className="text-sm text-red-500">*{lookupMessage}*</span> : null}
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  name="studentLrn"
+                  value={formData.studentLrn}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, "").slice(0, 20);
+                    handleChange({ target: { name: "studentLrn", value } });
+                    // clear previous lookup message when user edits LRN
+                    if (lookupMessage) setLookupMessage("");
+                  }}
+                  onFocus={handleFocus}
+                  className="w-full border rounded-md px-4 py-3 bg-gray-100"
+                  placeholder="LRN | Student number"
+                  maxLength={12}
+                />
+              </div>
+              <div className="flex justify-center items-end">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const lrn =
+                      formData.studentLrn && formData.studentLrn.trim();
+                    if (!lrn) return;
+                    try {
+                      const result = await handleFetchStudentInfo(lrn);
+                      if (!result) {
+                        setLookupMessage("Not existing");
+                      } else {
+                        setLookupMessage("");
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      alert("Failed to lookup LRN. Please try again.");
+                    }
+                  }}
+                  disabled={!isLrnValid}
+                  aria-disabled={!isLrnValid}
+                  className={`w-[150px] px-4 py-3 text-md rounded-md text-white font-semibold flex items-center justify-center transition-all ${
+                    isLrnValid
+                      ? "bg-green-500 hover:bg-green-600 shadow-md" // Highlight active state
+                      : "bg-gray-400 cursor-not-allowed" // Clear disabled state
+                  }`}
+                >
+                  Find Student
+                </button>
+              </div>
             </div>
-
-            <div className="w-full flex col-span-2 gap-6">
+            <div className="w-full flex col-span-2 gap-6 bg-gray-50 p-3 rounded-md items-center">
               {/* Alumni Checkbox */}
-              <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="isAlumni"
+                  checked={formData.isAlumni}
+                  onChange={handleChange}
+                  className="w-5 h-5 accent-green-600"
+                />
                 <label className="font-semibold mr-3">Alumni</label>
-                <div className="flex items-center h-14">
-                  <input
-                    type="checkbox"
-                    name="isAlumni"
-                    checked={formData.isAlumni}
-                    onChange={handleChange}
-                    className="w-5 h-5 accent-green-600"
-                  />
-                  <span className="ml-2 text-sm text-gray-600">
-                    Check if yes
-                  </span>
-                </div>
               </div>
               {/* Alumni Checkbox */}
-              <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="isVisitor"
+                  checked={formData.isVisitor}
+                  onChange={handleVisitorCheckboxChange}
+                  className="w-5 h-5 accent-green-600"
+                />
                 <label className="font-semibold mr-3">Visitor</label>
-                <div className="flex items-center h-14">
-                  <input
-                    type="checkbox"
-                    name="isVisitor"
-                    checked={formData.isVisitor}
-                    onChange={handleVisitorCheckboxChange}
-                    className="w-5 h-5 accent-green-600"
-                  />
-                  <span className="ml-2 text-sm text-gray-600">
-                    Check if yes
-                  </span>
-                </div>
               </div>
             </div>
           </div>
 
           <div className="flex gap-2 mb-4">
             <div>
-              <label className="block font-semibold mb-1">
-                First Name <span className="text-red-500">*</span>
-              </label>
+              <label className="block font-semibold mb-1">First Name</label>
               <input
                 type="text"
                 name="firstName"
@@ -153,12 +184,11 @@ const InputInformation = () => {
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="First name"
                 required
+                disabled
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1">
-                Last Name <span className="text-red-500">*</span>
-              </label>
+              <label className="block font-semibold mb-1">Last Name</label>
               <input
                 type="text"
                 name="lastName"
@@ -168,6 +198,7 @@ const InputInformation = () => {
                 className="w-full border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="Last name"
                 required
+                disabled
               />
             </div>
 
@@ -181,6 +212,7 @@ const InputInformation = () => {
                 onFocus={handleFocus}
                 className="w-[150px] border rounded-md px-4 py-3 bg-gray-100"
                 placeholder="MI"
+                disabled
               />
             </div>
             <div>
@@ -200,9 +232,7 @@ const InputInformation = () => {
           {/* Grade / Section / School Year */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
             <div className="relative">
-              <label className="block font-semibold mb-1">
-                Grade Level<span className="text-red-500">*</span>
-              </label>
+              <label className="block font-semibold mb-1">Grade Level<span className="text-red-500">*</span></label>
               <select
                 name="grade"
                 value={formData.grade}
@@ -275,7 +305,7 @@ const InputInformation = () => {
                 required
               />
               <span className="text-gray-500 text-sm">
-                This email will be used for notifications.
+                This email(you can edit) will be used for notifications.
               </span>
             </div>
 
@@ -321,7 +351,7 @@ const InputInformation = () => {
         </form>
       </div>
 
-      <BackButton onClick={() => navigate(-1)} />
+      <BackButton onClick={() => navigate(-1)} className="opacity-[70%]"/>
       {showVisitorModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 "

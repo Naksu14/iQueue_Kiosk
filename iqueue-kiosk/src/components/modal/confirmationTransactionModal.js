@@ -129,40 +129,26 @@ const ConfirmationTransactionModal = ({
         </div>
 
         {/* Footer / Action Buttons */}
-        <div className="p-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 bg-gray-50">
-          {/* Warning Message (Left side) */}
-          <div className="text-left max-w-sm">
-            <span className="text-sm font-bold text-gray-700 block">
-            IMPORTANT:
-            </span>
-            <span className="text-sm text-red-600 block">
-              Make sure your personal info and email address are correct to
-              receive updates on your request.
-            </span>
-          </div>
-
-          {/* Action Buttons (Right side) */}
-          <div className="flex gap-3">
-            <button
-              onClick={onCancel}
-              // Increased padding/text size slightly for better touch target on small screens
-              className="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition duration-150 ease-in-out"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              disabled={isSubmitting}
-              // Changed py-3 to py-2.5 for consistency and text-md to text-sm
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition duration-150 ease-in-out ${
-                isSubmitting
-                  ? "bg-green-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 shadow-md shadow-green-200"
-              }`}
-            >
-              {isSubmitting ? "Submitting..." : "Confirm & Proceed"}
-            </button>
-          </div>
+        <div className="p-2 flex items-center justify-center gap-4 border-t border-gray-100 bg-gray-50">
+          <button
+            onClick={onCancel}
+            // Increased padding/text size slightly for better touch target on small screens
+            className="px-5 py-3 rounded-lg text-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition duration-150 ease-in-out"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            // Changed py-3 to py-2.5 for consistency and text-md to text-sm
+            className={`px-5 py-3 rounded-lg text-md font-semibold text-white transition duration-150 ease-in-out ${
+              isSubmitting
+                ? "bg-green-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700 shadow-md shadow-green-200"
+            }`}
+          >
+            {isSubmitting ? "Submitting..." : "Confirm & Proceed"}
+          </button>
         </div>
       </div>
     </div>

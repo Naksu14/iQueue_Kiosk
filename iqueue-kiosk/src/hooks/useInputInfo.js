@@ -4,6 +4,7 @@ import { createUserInfo } from "../services/dbServices/createTransactionService"
 import { createQueueNumber } from "../services/dbServices/addQueueNumber";
 import { useTransaction } from "../context/walkinTransactionContext";
 import { getDirectAccountingSettings } from "../services/dbServices/officeKioskService";
+import { getStudentInfoByLRN } from "../services/dbServices/studentListService";
 
 export const useInputInfo = () => {
   const { attachPersonalInfoIdToAllTransactions } = useTransaction();
@@ -21,6 +22,51 @@ export const useInputInfo = () => {
     };
     fetchSettings();
   }, []);
+
+  const handleFetchStudentInfo = async (lrn) => {
+    try {
+      const studentInfo = await getStudentInfoByLRN(lrn);
+      if (studentInfo) {
+        // Map API fields to formData shape
+        setFormData((prev) => ({
+          ...prev,
+          studentLrn:
+            studentInfo.lrn || studentInfo.studentLrn || prev.studentLrn,
+          firstName:
+            studentInfo.first_name || studentInfo.firstName || prev.firstName,
+          lastName:
+            studentInfo.last_name || studentInfo.lastName || prev.lastName,
+          middleName:
+            studentInfo.middle_name ||
+            studentInfo.middleName ||
+            prev.middleName,
+          suffixName: studentInfo.suffix || prev.suffixName,
+          grade: studentInfo.grade_level || studentInfo.grade || prev.grade,
+          section: studentInfo.section || prev.section,
+          schoolYear:
+            studentInfo.school_year ||
+            studentInfo.schoolYear ||
+            prev.schoolYear,
+          email: studentInfo.email || prev.email,
+          // Normalize alumni flag to a strict boolean. Handle true/false, 1/0, and string forms.
+          isAlumni:
+            studentInfo.is_alumni === true ||
+            studentInfo.is_alumni === 1 ||
+            studentInfo.is_alumni === "1" ||
+            String(studentInfo.is_alumni).toLowerCase() === "true"
+              ? true
+              : false,
+        }));
+        return studentInfo;
+      }
+      // not found
+      return null;
+    } catch (error) {
+      console.error("Failed to fetch student info:", error);
+      return null;
+    }
+  };
+  // NOTE: do not auto-call fetch here; callers should invoke when needed.
 
   const [formData, setFormData] = useState(() => {
     // Load any temporarily saved form data so users who navigate back see their inputs
@@ -230,5 +276,6 @@ export const useInputInfo = () => {
     handleChange,
     handleSubmit,
     isSubmitting,
+    handleFetchStudentInfo,
   };
 };

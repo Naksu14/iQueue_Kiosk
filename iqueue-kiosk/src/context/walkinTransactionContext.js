@@ -100,6 +100,7 @@ export const TransactionProvider = ({ children }) => {
   const clearTransactions = () => {
     setTransactions([]);
     localStorage.removeItem("transactions");
+    localStorage.removeItem("tempFormData");
   };
 
   const handleConfirmCancel = () => {
