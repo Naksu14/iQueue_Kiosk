@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import useIdle from "../hooks/useIdle";
 import { useKeyboard } from "../context/KeyboardContext";
-import touchImage from "../assets/TouchFinal.png";
+import touchImage from "../assets/newkioskview.png";
 
 const IdleOverlay = ({ show, imageSrc, onResume }) => {
   if (!show) return null;
